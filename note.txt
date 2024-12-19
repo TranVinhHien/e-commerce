@@ -1,0 +1,28 @@
+trong dự án này các package đã tải bao gồm:
+migration:
+    sudo curl -L https://packagecloud.io/golang-migrate/migrate/gpgkey| apt-key add -
+    echo "deb https://packagecloud.io/golang-migrate/migrate/ubuntu/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/migrate.list
+    apt-get update
+    apt-get install -y migrate
+viper:
+    go get github.com/spf13/viper
+gin:
+    go get -u github.com/gin-gonic/gin
+sqlc:
+    sudo snap install sqlc
+pgx:
+    go get github.com/jackc/pgx/v5
+testing:
+    go get github.com/stretchr/testify/require
+zerolog:
+    go get github.com/rs/zerolog
+cors:
+    go get github.com/gin-contrib/cors
+uuid:
+    go get github.com/google/uuid
+jwt:
+    go get -u github.com/golang-jwt/jwt/v5
+redis:
+    go get github.com/redis/go-redis/v9
+gocron: // jobs scheduling package
+    go get github.com/go-co-op/gocron/v2
