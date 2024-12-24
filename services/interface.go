@@ -12,6 +12,7 @@ type UserUseCase interface {
 	Login(ctx context.Context, userName, password string) (accessToken, refreshToken string, info *services.Users, err *assets_services.ServiceError)
 	Logout(ctx context.Context, refreshToken string) *assets_services.ServiceError
 	Register(ctx context.Context, userName, password, fullName string) *assets_services.ServiceError
+	NewAccessToken(ctx context.Context, refreshToken string) (token *string, err *assets_services.ServiceError)
 }
 
 type UserRepository interface {

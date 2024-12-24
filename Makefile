@@ -25,7 +25,7 @@ startdb:
 stopdb:
 	docker stop postgres_c
 buildimg:
-	docker build -t tranvinhhien1912/new_project:v1.0 .
+	docker build -t new_project:latest .
 pushimg:
 	docker push tranvinhhien1912/new_project:tagname
 createtb:

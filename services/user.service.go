@@ -22,7 +22,8 @@ func (s *service) UpdatePassword(ctx context.Context, userName, oldPassword, new
 	if err != nil {
 		return nil, assets_services.NewError(400, err)
 	}
-	if user.Password != oldPassword {
+	err = util_assets.CheckPassword(oldPassword, user.Password)
+	if err != nil {
 		log.Debug().Msg("user password: " + user.Password + " oldPassword: " + oldPassword)
 		return nil, assets_services.NewError(400, fmt.Errorf("oldPassword is incorrect"))
 	}
@@ -80,4 +81,18 @@ func (s *service) Register(ctx context.Context, userName, password, fullName str
 	}
 
 	return nil
+}
+func (s *service) NewAccessToken(ctx context.Context, refreshToken string) (*string, *assets_services.ServiceError) {
+	payload, err := s.jwt.VerifyToken(refreshToken)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintln("s.env.AccessTokenDuration", s.env.AccessTokenDuration))
+		log.Info().Msg(fmt.Sprintln("s.env.RefershTokenDuration", s.env.RefershTokenDuration))
+		log.Info().Msg(fmt.Sprintln("refreshToken", refreshToken))
+		return nil, assets_services.NewError(400, fmt.Errorf("error when verifyToken: %v", err))
+	}
+	_, accessToken, err := s.jwt.CreateToken(payload.Sub, s.env.AccessTokenDuration)
+	if err != nil {
+		return nil, assets_services.NewError(400, fmt.Errorf("error when create new accessToken: %v", err))
+	}
+	return &accessToken, nil
 }

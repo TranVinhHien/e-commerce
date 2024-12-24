@@ -53,7 +53,7 @@ func (maker *JWTMaker) VerifyToken(tokenString string) (*Payload, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("lỗi đây là: %s", err.Error())
 	}
 
 	// Extract claims and validate

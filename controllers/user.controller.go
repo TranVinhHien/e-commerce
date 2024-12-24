@@ -1,14 +1,22 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	assets_api "new-project/assets/api"
 	controllers_model "new-project/controllers/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog/log"
 )
 
 // create a json to test this controller
+func (api *apiController) optionss() func(c *gin.Context) {
+	return func(ctx *gin.Context) {
+		fmt.Println(ctx)
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("Lỗi zo options", nil))
+	}
+}
 
 func (api *apiController) updatePassword() func(c *gin.Context) {
 	return func(ctx *gin.Context) {
@@ -61,7 +69,7 @@ func (api *apiController) login() func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("login successful", map[string]interface{}{
 			"access_token":  accessToken,
 			"refresh_token": refershToken,
-			"user":          user,
+			"user":          user.FullName,
 		}))
 	}
 }
@@ -93,5 +101,29 @@ func (api *apiController) register() func(ctx *gin.Context) {
 			return
 		}
 		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("register successful", nil))
+	}
+}
+func (api *apiController) newAccessToken() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		var req controllers_model.LogOutParams
+		log.Info().Msg("đoạn 1")
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, assets_api.ResponseError(http.StatusBadRequest, err.Error()))
+			return
+		}
+
+		log.Info().Msg("đoạn 2")
+		token, err := api.service.NewAccessToken(ctx, req.RefreshToken)
+		if err != nil {
+			log.Error().Err(err).Msg("lỗi service")
+
+			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
+			return
+		}
+
+		log.Info().Msg("đoạn 3")
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("get new Token successful", map[string]interface{}{
+			"access_token": token,
+		}))
 	}
 }

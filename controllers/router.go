@@ -25,9 +25,13 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 		user.POST("/login", api.login())
 		user.POST("/logout", api.logout())
 		user.POST("/register", api.register())
+		user.OPTIONS("/login", api.optionss())
+		user.OPTIONS("/new_access_token", api.optionss())
+		user.POST("/new_access_token", api.newAccessToken())
 	}
 	dalogin := group.Group("/dalogin").Use(authorization(api.jwt))
 	{
 		dalogin.GET("/ghi", api.checkAuth())
+		dalogin.OPTIONS("/ghi", api.checkAuth())
 	}
 }

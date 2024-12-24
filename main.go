@@ -48,13 +48,12 @@ func main() {
 		log.Err(err).Msg("Error create JWTMaker")
 		return
 	}
-
+	rdb, err := connectDBRedisWithRetry(5)
+	if err != nil {
+		log.Err(err).Msg("Error when created connect to redis")
+		return
+	}
 	//setup redis Options
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
 	redisdb := redis_db.NewRedisDB(rdb)
 	// start jobs
 	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
@@ -64,10 +63,13 @@ func main() {
 
 	engine := gin.Default()
 	// config cors middleware
-	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"http://localhost:3000"}
-	config.AllowHeaders = []string{"Authorization", "Content-Type"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config := cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},                   // Chỉ cho phép localhost:3000
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Các method được phép
+		AllowHeaders:     []string{"Content-Type", "Origin", "Authorization"}, // Các headers được phép
+		ExposeHeaders:    []string{"Content-Length"},                          // Các headers trả về
+		AllowCredentials: true,                                                // Cho phép cookies
+	}
 
 	v1 := engine.Group("/v1")
 	v1.Use(cors.New(config))
@@ -78,7 +80,32 @@ func main() {
 	engine.Run(env.HTTPServerAddress)
 
 }
+func connectDBRedisWithRetry(times int) (*redis.Client, error) {
+	var e error
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2*time.Duration(times))
+	defer cancel()
+	for i := 1; i <= times; i++ {
+		rdb := redis.NewClient(&redis.Options{
+			Addr:     "localhost:6379",
+			Password: "", // no password set
+			DB:       0,  // use default DB
+		})
+		_, err := rdb.Ping(ctx).Result()
 
+		if err != nil {
+			log.Err(err).Msg("Can't connect to redis")
+		}
+		// defer conn.Release()
+
+		if err == nil {
+			return rdb, nil
+		}
+		e = err
+		time.Sleep(time.Second * 2)
+	}
+	return nil, e
+
+}
 func connectDBWithRetry(times int, dbConfig string) (*pgxpool.Pool, error) {
 	var e error
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2*time.Duration(times))
@@ -98,7 +125,7 @@ func connectDBWithRetry(times int, dbConfig string) (*pgxpool.Pool, error) {
 			return pool, nil
 		}
 		e = err
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Second * 2)
 	}
 	return nil, e
 }
