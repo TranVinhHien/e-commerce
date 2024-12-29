@@ -14,6 +14,7 @@ type ReadENV struct {
 	JWTSecret            string        `mapstructure:"JWT_SECRET"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefershTokenDuration time.Duration `mapstructure:"REFRERSH_TOKEN_DURATION"`
+	ClientIP             string        `mapstructure:"CLIENT_IP"`
 }
 
 func LoadConfig(path string) (config ReadENV, err error) {
