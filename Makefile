@@ -13,23 +13,23 @@ sqlc:
 initmg:
 	migrate create -ext sql -dir db/migration/ -seq init_mg
 createc:
-	docker run --name postgres_c -p 5432:5432  -e POSTGRES_USER=root -e POSTGRES_PASSWORD=12345 -d postgres:17-alpine
+	docker run --name mysql_c -e MYSQL_ROOT_PASSWORD=12345 -p 3306:3306 -d mysql:8.3.0
 rmc:
-	docker rm postgres_c
+	docker rm mysql_c
 initdb:
-	docker exec -it postgres_c createdb --username=root --owner=root new_project
+	docker exec -it mysql_c mysql -u root -p12345 -e "CREATE DATABASE \`e-commerce\`;"
 dropdb:
-	docker exec -it postgres_c dropdb new_project
+	docker exec -it mysql_c mysql -u root -p12345 -e "DROP DATABASE \`e-commerce\`;"
 startdb:
-	docker start postgres_c
+	docker start mysql_c
 stopdb:
-	docker stop postgres_c
+	docker stop mysql_c
 buildimg:
-	docker build -t new_project:latest .
+	docker build -t mysql_c:latest .
 pushimg:
-	docker push tranvinhhien1912/new_project:tagname
+	docker push tranvinhhien1912/mysql_c:tagname
 createtb:
-	migrate -path db/migration/ -database "postgresql://root:12345@localhost:5432/new_project?sslmode=disable" -verbose up
+	migrate -path db/migration/ -database "mysql://root:12345@tcp(localhost:3306)/e-commerce" -verbose up
 droptb:
-	migrate -path db/migration/ -database "postgresql://root:12345@localhost:5432/new_project?sslmode=disable" -verbose down
+	migrate -path db/migration/ -database "mysql://root:12345@tcp(localhost:3306)/e-commerce" -verbose down
 .PHONY: run

@@ -12,6 +12,6 @@ type service struct {
 	env        config_assets.ReadENV
 }
 
-func NewService(repo ServicesRepository, jwt token.Maker, env config_assets.ReadENV, redis ServicesRedis) UserUseCase {
+func NewService(repo ServicesRepository, jwt token.Maker, env config_assets.ReadENV, redis ServicesRedis) ServiceUseCase {
 	return &service{repository: repo, jwt: jwt, env: env, redis: redis}
 }

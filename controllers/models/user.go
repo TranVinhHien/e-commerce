@@ -1,5 +1,7 @@
 package controllers_model
 
+import "time"
+
 type LoginParams struct {
 	Username string `form:"username" json:"username" binding:"required,alphanum"`
 	Password string `form:"password" json:"password" binding:"required,min=6"`
@@ -10,5 +12,16 @@ type LogOutParams struct {
 type RegisterParams struct {
 	Username string `form:"username" json:"username" binding:"required,alphanum"`
 	Password string `form:"password" json:"password" binding:"required,min=6"`
-	FullName string `form:"full_name" json:"full_name" binding:"required"`
+	// Customer_info Customers `form:"customer" json:"customer" binding:"required"`
+	Name   string    `form:"name" json:"name" binding:"required"`
+	Email  string    `form:"email" json:"email" binding:"required,email"`
+	Dob    time.Time `form:"dob" json:"dob" binding:"required"`
+	Gender string    `form:"gender" json:"gender" binding:"required"`
+}
+
+type Customers struct {
+	Name   string    `form:"name" json:"name"`
+	Email  string    `form:"email" json:"email"`
+	Dob    time.Time `form:"dob" json:"dob"`
+	Gender string    `form:"gender" json:"gender"`
 }

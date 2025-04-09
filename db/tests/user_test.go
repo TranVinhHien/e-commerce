@@ -1,52 +1,45 @@
-package db
+package db_test
 
 // import (
 // 	"context"
-// 	"fmt"
-// 	util_assets "new-project/assets/util"
+// 	"database/sql"
 // 	db "new-project/db/sqlc"
 // 	"testing"
 // 	"time"
 
-// 	"github.com/jackc/pgx/v5/pgtype"
+// 	_ "github.com/go-sql-driver/mysql"
 // 	"github.com/stretchr/testify/require"
 // )
 
-// func TestAddUser(t *testing.T) {
-
-// 	user, err := testStore.GetUser(context.Background(), "r5ZxKonFoF")
-// 	require.NoError(t, err)
-// 	fmt.Print(user)
-// 	require.Empty(t, user)
+// func createRandomUser() db.Users {
+// 	return db.Users{
+// 		Username: "testuser",
+// 		Password: "password",
+// 		FullName: "Test User",
+// 		IsActive: true,
+// 		CreateAt: time.Now(),
+// 	}
 // }
 
-// // func Test Create User
-// func TestCreateUser(t *testing.T) {
+// func TestGetUser(t *testing.T) {
+// 	pool, err := sql.Open("mysql", "root:12345@tcp(localhost:3306)/e-commerce")
+// 	store := db.New(pool)
 
-// 	userName123 := util_assets.RandomString(10)
-// 	user, err := testStore.(context.Background(),
-// 		db.CreateUserParams{
-// 			Username: userName123,
-// 			Password: util_assets.RandomString(10),
-// 			FullName: util_assets.RandomString(20),
-// 			CreateAt: time.Now(),
-// 		})
+// 	// Create a random user
+// 	user := createRandomUser()
+
+// 	// Insert the user into the database
+
 // 	require.NoError(t, err)
-// 	require.Equal(t, user.Username, userName123)
+
+// 	// Retrieve the user from the database
+// 	retrievedUser, err := store.GetUser(context.Background(), user.Username)
+// 	require.NoError(t, err)
+
+// 	// Verify the retrieved user's information
+// 	require.Equal(t, user.Username, retrievedUser.Username)
+// 	require.Equal(t, user.Password, retrievedUser.Password)
+// 	require.Equal(t, user.FullName, retrievedUser.FullName)
+// 	require.Equal(t, user.IsActive, retrievedUser.IsActive)
+// 	require.WithinDuration(t, user.CreateAt, retrievedUser.CreateAt, time.Second)
 // }
-// // func TestUpdateUser(t *testing.T) {
-// // 	userName123 := "r5ZxKonFoF"
-// // 	Password := util_assets.RandomString(20)
-// // 	user, err := testStore.UpdateUser(context.Background(),
-// // 		db.UpdateUserParams{
-// // 			Username: userName123,
-// // 			Password: pgtype.Text{String: Password, Valid: true},
-// // 			// FullName: pgtype.Text{String: FullName, Valid: true},
-
-// // 			IsActive: pgtype.Bool{Valid: true, Bool: true},
-// // 		})
-// // 	require.NoError(t, err)
-// // 	require.Equal(t, userName123, user.Username)
-// // 	require.Equal(t, "yFfhpInNHxuu97Bd9aCI", user.FullName)
-
-// // }

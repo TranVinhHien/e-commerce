@@ -1,2 +1,23 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS sessions;
+SET FOREIGN_KEY_CHECKS = 0;
+
+DROP TABLE IF EXISTS role_account;
+DROP TABLE IF EXISTS order_detail;
+DROP TABLE IF EXISTS purchase_order_detail;
+DROP TABLE IF EXISTS `orders`;
+DROP TABLE IF EXISTS purchase_orders;
+DROP TABLE IF EXISTS customer_address;
+DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS product_skus;
+DROP TABLE IF EXISTS product_sku_attrs;
+DROP TABLE IF EXISTS description_attr;
+DROP TABLE IF EXISTS employees;
+DROP TABLE IF EXISTS customers;
+DROP TABLE IF EXISTS products_spu;
+DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS suppliers;
+DROP TABLE IF EXISTS categorys;
+DROP TABLE IF EXISTS discounts;
+DROP TABLE IF EXISTS payment_methods;
+DROP TABLE IF EXISTS roles;
+
+SET FOREIGN_KEY_CHECKS = 1;

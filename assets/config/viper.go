@@ -15,6 +15,10 @@ type ReadENV struct {
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefershTokenDuration time.Duration `mapstructure:"REFRERSH_TOKEN_DURATION"`
 	ClientIP             string        `mapstructure:"CLIENT_IP"`
+	Customer             string        `mapstructure:"CUSTOMER"`
+	QuanLy               string        `mapstructure:"QUANLY"`
+	NhanVien             string        `mapstructure:"NHANVIEN"`
+	ImagePath            string        `mapstructure:"IMAGE_PATH"`
 }
 
 func LoadConfig(path string) (config ReadENV, err error) {

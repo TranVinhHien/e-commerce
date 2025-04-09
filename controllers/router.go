@@ -8,11 +8,11 @@ import (
 )
 
 type apiController struct {
-	service services.UserUseCase
+	service services.ServiceUseCase
 	jwt     token.Maker
 }
 
-func NewAPIController(s services.UserUseCase, jwt token.Maker) apiController {
+func NewAPIController(s services.ServiceUseCase, jwt token.Maker) apiController {
 	return apiController{service: s, jwt: jwt}
 }
 
@@ -25,13 +25,22 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 		user.POST("/login", api.login())
 		user.POST("/logout", api.logout())
 		user.POST("/register", api.register())
-		//user.OPTIONS("/login", api.optionss())
-		// user.OPTIONS("/new_access_token", api.optionss())
 		user.POST("/new_access_token", api.newAccessToken())
+		//
+		user_auth := user.Group("/info").Use(authorization(api.jwt))
+		{
+			user_auth.PATCH("/update_customer", api.updateCustomer())
+			user_auth.PATCH("/update_avatar_customer", api.updateCustomerAvatar())
+		}
 	}
+
 	dalogin := group.Group("/dalogin").Use(authorization(api.jwt))
 	{
 		dalogin.GET("/ghi", api.checkAuth())
 		// dalogin.OPTIONS("/ghi", api.optionss())
+	}
+	media := group.Group("/media")
+	{
+		media.GET("/images/:id", api.renderImages())
 	}
 }

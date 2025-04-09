@@ -21,7 +21,7 @@ type Payload struct {
 func CreateNewPayload(username string, duration time.Duration) *Payload {
 	payload := Payload{
 		Sub: username,
-		Iss: "new.project.com",
+		Iss: "hienlazada.edu.vn",
 		Aud: "sau này truyền role vào đây",
 		Exp: time.Now().Add(duration).Unix(),
 		Iat: time.Now().Unix(),
