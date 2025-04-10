@@ -12,7 +12,7 @@ import (
 
 const createRating = `-- name: CreateRating :exec
 INSERT INTO ratings (
-  rating_id, comment, star, account_id, products_spu_id
+  rating_id, comment, star, customer_id, products_spu_id
 ) VALUES (
   ?, ?, ?, ?, ?
 )
@@ -22,7 +22,7 @@ type CreateRatingParams struct {
 	RatingID      string         `json:"rating_id"`
 	Comment       sql.NullString `json:"comment"`
 	Star          int32          `json:"star"`
-	AccountID     string         `json:"account_id"`
+	CustomerID    string         `json:"customer_id"`
 	ProductsSpuID string         `json:"products_spu_id"`
 }
 
@@ -31,7 +31,7 @@ func (q *Queries) CreateRating(ctx context.Context, arg CreateRatingParams) erro
 		arg.RatingID,
 		arg.Comment,
 		arg.Star,
-		arg.AccountID,
+		arg.CustomerID,
 		arg.ProductsSpuID,
 	)
 	return err
@@ -48,7 +48,7 @@ func (q *Queries) DeleteRating(ctx context.Context, ratingID string) error {
 }
 
 const getRating = `-- name: GetRating :one
-SELECT rating_id, comment, star, create_date, update_date, account_id, products_spu_id FROM ratings
+SELECT rating_id, comment, star, create_date, update_date, customer_id, products_spu_id FROM ratings
 WHERE rating_id = ? LIMIT 1
 `
 
@@ -61,14 +61,14 @@ func (q *Queries) GetRating(ctx context.Context, ratingID string) (Ratings, erro
 		&i.Star,
 		&i.CreateDate,
 		&i.UpdateDate,
-		&i.AccountID,
+		&i.CustomerID,
 		&i.ProductsSpuID,
 	)
 	return i, err
 }
 
 const listRatings = `-- name: ListRatings :many
-SELECT rating_id, comment, star, create_date, update_date, account_id, products_spu_id FROM ratings
+SELECT rating_id, comment, star, create_date, update_date, customer_id, products_spu_id FROM ratings
 WHERE products_spu_id = ?
 `
 
@@ -87,7 +87,7 @@ func (q *Queries) ListRatings(ctx context.Context, productsSpuID string) ([]Rati
 			&i.Star,
 			&i.CreateDate,
 			&i.UpdateDate,
-			&i.AccountID,
+			&i.CustomerID,
 			&i.ProductsSpuID,
 		); err != nil {
 			return nil, err
@@ -104,7 +104,7 @@ func (q *Queries) ListRatings(ctx context.Context, productsSpuID string) ([]Rati
 }
 
 const listRatingsPaged = `-- name: ListRatingsPaged :many
-SELECT rating_id, comment, star, create_date, update_date, account_id, products_spu_id FROM ratings
+SELECT rating_id, comment, star, create_date, update_date, customer_id, products_spu_id FROM ratings
 WHERE products_spu_id = ?
 ORDER BY create_date DESC
 LIMIT ? OFFSET ?
@@ -131,7 +131,7 @@ func (q *Queries) ListRatingsPaged(ctx context.Context, arg ListRatingsPagedPara
 			&i.Star,
 			&i.CreateDate,
 			&i.UpdateDate,
-			&i.AccountID,
+			&i.CustomerID,
 			&i.ProductsSpuID,
 		); err != nil {
 			return nil, err

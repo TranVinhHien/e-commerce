@@ -42,6 +42,18 @@ func (u *Customers) Convert() services.Customers {
 	}
 }
 
+// Role
+func (u *CustomerAddress) Convert() services.CustomerAddress {
+	return services.CustomerAddress{
+		CustomerID:  u.CustomerID,
+		IDAddress:   u.IDAddress,
+		Address:     u.Address,
+		PhoneNumber: u.PhoneNumber,
+		CreateDate:  u.CreateDate.Time,
+		UpdateDate:  services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
+	}
+}
+
 // DescriptionAttr
 func (u *DescriptionAttr) Convert() services.DescriptionAttr {
 	return services.DescriptionAttr{
@@ -159,7 +171,7 @@ func (u *ProductsSpu) Convert() services.ProductsSpu {
 		CreateDate:       u.CreateDate.Time,
 		UpdateDate:       services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
 		Image:            u.Image,
-		Media:            string(u.Media),
+		Media:            u.Media.String,
 		Key:              u.Key,
 		CategoryID:       u.CategoryID,
 	}

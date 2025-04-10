@@ -92,10 +92,13 @@ func (s *SQLStore) GetCustomerByAccountID(ctx context.Context, accountID string)
 	}
 	return u.Convert(), nil
 }
-
-func (s *SQLStore) InsertCustomers(ctx context.Context, user services.Customers) error {
-
-	return nil
+func (s *SQLStore) GetCustomer(ctx context.Context, customer_id string) (services.Customers, error) {
+	u, err := s.Queries.GetCustomer(ctx, customer_id)
+	if err != nil {
+		log.Fatal("error when get user by customer_id: ", customer_id, err)
+		return services.Customers{}, err
+	}
+	return u.Convert(), nil
 }
 
 func (s *SQLStore) UpdateCustomers(ctx context.Context, user services.Customers, fn func() error) error {
@@ -120,14 +123,6 @@ func (s *SQLStore) UpdateCustomers(ctx context.Context, user services.Customers,
 	})
 
 	return err
-}
-
-func (s *SQLStore) InsertAccount(ctx context.Context, account services.Accounts) error {
-	// u, err := s.Queries.GetUser(ctx, userName)
-	// if err != nil {
-	return nil
-	// }
-	// return u.Convert(), nil
 }
 
 func (s *SQLStore) Register(ctx context.Context, account *services.Accounts, userInfo *services.Customers, roleID string) error {
@@ -187,4 +182,35 @@ func (s *SQLStore) Login(ctx context.Context, username string) (account services
 	return account, acc.RoleID, nil
 }
 
-//
+func (s *SQLStore) CreateCustomerAddresses(ctx context.Context, customer_id string, address *services.CustomerAddress) (err error) {
+	return s.Queries.CreateCustomerAddress(ctx, db.CreateCustomerAddressParams{
+		Address:     address.Address,
+		PhoneNumber: address.PhoneNumber,
+		IDAddress:   address.IDAddress,
+		CustomerID:  address.CustomerID,
+	})
+}
+func (s *SQLStore) UpdateCustomerAddresses(ctx context.Context, customer_id string, address *services.CustomerAddress) (err error) {
+	return s.Queries.UpdateCustomerAddress(ctx, db.UpdateCustomerAddressParams{
+		Address:     sql.NullString{String: address.Address, Valid: address.Address != ""},
+		PhoneNumber: sql.NullString{String: address.PhoneNumber, Valid: address.PhoneNumber != ""},
+		IDAddress:   address.IDAddress,
+	})
+
+}
+func (s *SQLStore) DeleteCustomerAddresses(ctx context.Context, customer_id string, address_id string) (err error) {
+	return s.Queries.DeleteCustomerAddress(ctx, address_id)
+}
+func (s *SQLStore) ListCustomerAddresses(ctx context.Context, customer_id string) (addresss []services.CustomerAddress, err error) {
+	list, err := s.Queries.ListCustomerAddresses(ctx, customer_id)
+	// Cấp phát dung lượng slice kết quả
+	items := make([]services.CustomerAddress, len(list))
+	if err != nil {
+		return nil, err
+	}
+	// Duyệt và chuyển đổi
+	for i, item := range list {
+		items[i] = item.Convert()
+	}
+	return items, nil
+}

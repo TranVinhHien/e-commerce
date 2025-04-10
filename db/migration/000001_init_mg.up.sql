@@ -124,7 +124,7 @@ CREATE TABLE ratings(
   update_date DATETIME DEFAULT NOW(),
   customer_id VARCHAR(36) NOT NULL,
   products_spu_id VARCHAR(36) NOT NULL,
-  FOREIGN KEY (customer_id) REFERENCES customer(customer_id),
+  FOREIGN KEY (customer_id) REFERENCES customers(customer_id),
   FOREIGN KEY (products_spu_id) REFERENCES products_spu(products_spu_id)
 );
 
@@ -154,7 +154,6 @@ CREATE TABLE discounts (
   end_date DATETIME NOT NULL,
   min_order_value DOUBLE DEFAULT 0 CHECK (min_order_value >= 0),
   amount INT DEFAULT 0 CHECK (amount >= 0),
-  status_discount ENUM('Còn Hiệu Lực', 'Hết Hạn', 'Hết Lượt Sử Dụng') DEFAULT 'Còn Hiệu Lực',
   create_date DATETIME DEFAULT NOW(),
   update_date DATETIME DEFAULT NOW()
 );

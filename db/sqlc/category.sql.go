@@ -98,6 +98,41 @@ func (q *Queries) ListCategories(ctx context.Context) ([]Categorys, error) {
 	return items, nil
 }
 
+const listCategoriesByID = `-- name: ListCategoriesByID :many
+SELECT c1.category_id, c1.name, c1.` + "`" + `key` + "`" + `, c1.path, c1.parent
+FROM categorys AS c1 
+WHERE c1.path LIKE CONCAt((SELECT path FROM categorys as c2 WHERE c2.category_id = ?),'%')
+`
+
+func (q *Queries) ListCategoriesByID(ctx context.Context, categoryID string) ([]Categorys, error) {
+	rows, err := q.db.QueryContext(ctx, listCategoriesByID, categoryID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Categorys
+	for rows.Next() {
+		var i Categorys
+		if err := rows.Scan(
+			&i.CategoryID,
+			&i.Name,
+			&i.Key,
+			&i.Path,
+			&i.Parent,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listCategoriesPaged = `-- name: ListCategoriesPaged :many
 SELECT category_id, name, ` + "`" + `key` + "`" + `, path, parent FROM categorys
 ORDER BY category_id

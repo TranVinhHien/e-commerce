@@ -16,11 +16,12 @@ type Accounts struct {
 }
 
 type Categorys struct {
-	CategoryID string       `json:"category_id"`
-	Name       string       `json:"name"`
-	Key        string       `json:"key"`
-	Path       string       `json:"path"`
-	Parent     Narg[string] `json:"parent"`
+	CategoryID string            `json:"category_id"`
+	Name       string            `json:"name"`
+	Key        string            `json:"key"`
+	Path       string            `json:"path"`
+	Parent     Narg[string]      `json:"parent"`
+	Childs     Narg[[]Categorys] `json:"child"`
 }
 
 type CustomerAddress struct {

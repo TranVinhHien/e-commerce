@@ -1,6 +1,6 @@
 -- name: CreateRating :exec
 INSERT INTO ratings (
-  rating_id, comment, star, account_id, products_spu_id
+  rating_id, comment, star, customer_id, products_spu_id
 ) VALUES (
   ?, ?, ?, ?, ?
 );

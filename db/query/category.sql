@@ -23,6 +23,10 @@ WHERE category_id = ? LIMIT 1;
 
 -- name: ListCategories :many
 SELECT * FROM categorys;
+-- name: ListCategoriesByID :many
+SELECT c1.*
+FROM categorys AS c1 
+WHERE c1.path LIKE CONCAt((SELECT path FROM categorys as c2 WHERE c2.category_id = sqlc.arg('category_id')),'%') ;
 
 -- name: ListCategoriesPaged :many
 SELECT * FROM categorys

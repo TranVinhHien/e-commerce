@@ -53,7 +53,7 @@ func (q *Queries) DeleteDiscount(ctx context.Context, discountID string) error {
 }
 
 const getDiscount = `-- name: GetDiscount :one
-SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, status_discount, create_date, update_date FROM discounts
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 WHERE discount_id = ? LIMIT 1
 `
 
@@ -68,7 +68,6 @@ func (q *Queries) GetDiscount(ctx context.Context, discountID string) (Discounts
 		&i.EndDate,
 		&i.MinOrderValue,
 		&i.Amount,
-		&i.StatusDiscount,
 		&i.CreateDate,
 		&i.UpdateDate,
 	)
@@ -76,7 +75,7 @@ func (q *Queries) GetDiscount(ctx context.Context, discountID string) (Discounts
 }
 
 const getDiscountByCode = `-- name: GetDiscountByCode :one
-SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, status_discount, create_date, update_date FROM discounts
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 WHERE discount_code = ? LIMIT 1
 `
 
@@ -91,7 +90,6 @@ func (q *Queries) GetDiscountByCode(ctx context.Context, discountCode string) (D
 		&i.EndDate,
 		&i.MinOrderValue,
 		&i.Amount,
-		&i.StatusDiscount,
 		&i.CreateDate,
 		&i.UpdateDate,
 	)
@@ -99,8 +97,7 @@ func (q *Queries) GetDiscountByCode(ctx context.Context, discountCode string) (D
 }
 
 const listActiveDiscounts = `-- name: ListActiveDiscounts :many
-SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, status_discount, create_date, update_date FROM discounts
-WHERE status_discount = 'Còn Hiệu Lực' AND end_date > NOW()
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 `
 
 func (q *Queries) ListActiveDiscounts(ctx context.Context) ([]Discounts, error) {
@@ -120,7 +117,6 @@ func (q *Queries) ListActiveDiscounts(ctx context.Context) ([]Discounts, error) 
 			&i.EndDate,
 			&i.MinOrderValue,
 			&i.Amount,
-			&i.StatusDiscount,
 			&i.CreateDate,
 			&i.UpdateDate,
 		); err != nil {
@@ -138,7 +134,7 @@ func (q *Queries) ListActiveDiscounts(ctx context.Context) ([]Discounts, error) 
 }
 
 const listDiscounts = `-- name: ListDiscounts :many
-SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, status_discount, create_date, update_date FROM discounts
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 `
 
 func (q *Queries) ListDiscounts(ctx context.Context) ([]Discounts, error) {
@@ -158,7 +154,6 @@ func (q *Queries) ListDiscounts(ctx context.Context) ([]Discounts, error) {
 			&i.EndDate,
 			&i.MinOrderValue,
 			&i.Amount,
-			&i.StatusDiscount,
 			&i.CreateDate,
 			&i.UpdateDate,
 		); err != nil {
@@ -176,7 +171,7 @@ func (q *Queries) ListDiscounts(ctx context.Context) ([]Discounts, error) {
 }
 
 const listDiscountsPaged = `-- name: ListDiscountsPaged :many
-SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, status_discount, create_date, update_date FROM discounts
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 ORDER BY discount_id
 LIMIT ? OFFSET ?
 `
@@ -203,7 +198,6 @@ func (q *Queries) ListDiscountsPaged(ctx context.Context, arg ListDiscountsPaged
 			&i.EndDate,
 			&i.MinOrderValue,
 			&i.Amount,
-			&i.StatusDiscount,
 			&i.CreateDate,
 			&i.UpdateDate,
 		); err != nil {
@@ -228,20 +222,18 @@ SET discount_code = COALESCE(?, discount_code),
     end_date = COALESCE(?, end_date),
     min_order_value = COALESCE(?, min_order_value),
     amount = COALESCE(?, amount),
-    status_discount = COALESCE(?, status_discount),
     update_date = NOW()
 WHERE discount_id = ?
 `
 
 type UpdateDiscountParams struct {
-	DiscountCode   sql.NullString              `json:"discount_code"`
-	DiscountValue  sql.NullFloat64             `json:"discount_value"`
-	StartDate      sql.NullTime                `json:"start_date"`
-	EndDate        sql.NullTime                `json:"end_date"`
-	MinOrderValue  sql.NullFloat64             `json:"min_order_value"`
-	Amount         sql.NullInt32               `json:"amount"`
-	StatusDiscount NullDiscountsStatusDiscount `json:"status_discount"`
-	DiscountID     string                      `json:"discount_id"`
+	DiscountCode  sql.NullString  `json:"discount_code"`
+	DiscountValue sql.NullFloat64 `json:"discount_value"`
+	StartDate     sql.NullTime    `json:"start_date"`
+	EndDate       sql.NullTime    `json:"end_date"`
+	MinOrderValue sql.NullFloat64 `json:"min_order_value"`
+	Amount        sql.NullInt32   `json:"amount"`
+	DiscountID    string          `json:"discount_id"`
 }
 
 func (q *Queries) UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) error {
@@ -252,7 +244,6 @@ func (q *Queries) UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) 
 		arg.EndDate,
 		arg.MinOrderValue,
 		arg.Amount,
-		arg.StatusDiscount,
 		arg.DiscountID,
 	)
 	return err

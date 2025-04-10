@@ -25,3 +25,9 @@ type Customers struct {
 	Dob    time.Time `form:"dob" json:"dob"`
 	Gender string    `form:"gender" json:"gender"`
 }
+
+type CustomersAddress struct {
+	Address_id  string `form:"address_id" json:"address_id"`
+	Address     string `form:"address" json:"address"`
+	PhoneNumber string `form:"phoneNumber" json:"phoneNumber" binding:"required,min=9,max=11"`
+}

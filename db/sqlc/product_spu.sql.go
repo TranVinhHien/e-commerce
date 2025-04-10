@@ -8,7 +8,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
 )
 
 const createProductSPU = `-- name: CreateProductSPU :exec
@@ -20,15 +19,15 @@ INSERT INTO products_spu (
 `
 
 type CreateProductSPUParams struct {
-	ProductsSpuID    string          `json:"products_spu_id"`
-	Name             string          `json:"name"`
-	BrandID          string          `json:"brand_id"`
-	Description      string          `json:"description"`
-	ShortDescription string          `json:"short_description"`
-	Image            string          `json:"image"`
-	Media            json.RawMessage `json:"media"`
-	Key              string          `json:"key"`
-	CategoryID       string          `json:"category_id"`
+	ProductsSpuID    string         `json:"products_spu_id"`
+	Name             string         `json:"name"`
+	BrandID          string         `json:"brand_id"`
+	Description      string         `json:"description"`
+	ShortDescription string         `json:"short_description"`
+	Image            string         `json:"image"`
+	Media            sql.NullString `json:"media"`
+	Key              string         `json:"key"`
+	CategoryID       string         `json:"category_id"`
 }
 
 func (q *Queries) CreateProductSPU(ctx context.Context, arg CreateProductSPUParams) error {
@@ -245,7 +244,7 @@ type UpdateProductSPUParams struct {
 	StockStatus      NullProductsSpuStockStatus `json:"stock_status"`
 	Sort             sql.NullInt32              `json:"sort"`
 	Image            sql.NullString             `json:"image"`
-	Media            json.RawMessage            `json:"media"`
+	Media            sql.NullString             `json:"media"`
 	Key              sql.NullString             `json:"key"`
 	CategoryID       sql.NullString             `json:"category_id"`
 	ProductsSpuID    string                     `json:"products_spu_id"`

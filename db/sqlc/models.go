@@ -7,7 +7,6 @@ package db
 import (
 	"database/sql"
 	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -94,49 +93,6 @@ func (ns NullCustomersGender) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.CustomersGender), nil
-}
-
-type DiscountsStatusDiscount string
-
-const (
-	DiscountsStatusDiscountCnHiuLc  DiscountsStatusDiscount = "Còn Hiệu Lực"
-	DiscountsStatusDiscountHtHn     DiscountsStatusDiscount = "Hết Hạn"
-	DiscountsStatusDiscountHtLtSDng DiscountsStatusDiscount = "Hết Lượt Sử Dụng"
-)
-
-func (e *DiscountsStatusDiscount) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = DiscountsStatusDiscount(s)
-	case string:
-		*e = DiscountsStatusDiscount(s)
-	default:
-		return fmt.Errorf("unsupported scan type for DiscountsStatusDiscount: %T", src)
-	}
-	return nil
-}
-
-type NullDiscountsStatusDiscount struct {
-	DiscountsStatusDiscount DiscountsStatusDiscount `json:"discounts_status_discount"`
-	Valid                   bool                    `json:"valid"` // Valid is true if DiscountsStatusDiscount is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullDiscountsStatusDiscount) Scan(value interface{}) error {
-	if value == nil {
-		ns.DiscountsStatusDiscount, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.DiscountsStatusDiscount.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullDiscountsStatusDiscount) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.DiscountsStatusDiscount), nil
 }
 
 type EmployeesGender string
@@ -442,16 +398,15 @@ type DescriptionAttr struct {
 }
 
 type Discounts struct {
-	DiscountID     string                      `json:"discount_id"`
-	DiscountCode   string                      `json:"discount_code"`
-	DiscountValue  float64                     `json:"discount_value"`
-	StartDate      time.Time                   `json:"start_date"`
-	EndDate        time.Time                   `json:"end_date"`
-	MinOrderValue  sql.NullFloat64             `json:"min_order_value"`
-	Amount         sql.NullInt32               `json:"amount"`
-	StatusDiscount NullDiscountsStatusDiscount `json:"status_discount"`
-	CreateDate     sql.NullTime                `json:"create_date"`
-	UpdateDate     sql.NullTime                `json:"update_date"`
+	DiscountID    string          `json:"discount_id"`
+	DiscountCode  string          `json:"discount_code"`
+	DiscountValue float64         `json:"discount_value"`
+	StartDate     time.Time       `json:"start_date"`
+	EndDate       time.Time       `json:"end_date"`
+	MinOrderValue sql.NullFloat64 `json:"min_order_value"`
+	Amount        sql.NullInt32   `json:"amount"`
+	CreateDate    sql.NullTime    `json:"create_date"`
+	UpdateDate    sql.NullTime    `json:"update_date"`
 }
 
 type Employees struct {
@@ -527,7 +482,7 @@ type ProductsSpu struct {
 	CreateDate       sql.NullTime                `json:"create_date"`
 	UpdateDate       sql.NullTime                `json:"update_date"`
 	Image            string                      `json:"image"`
-	Media            json.RawMessage             `json:"media"`
+	Media            sql.NullString              `json:"media"`
 	Key              string                      `json:"key"`
 	CategoryID       string                      `json:"category_id"`
 }
@@ -556,7 +511,7 @@ type Ratings struct {
 	Star          int32          `json:"star"`
 	CreateDate    sql.NullTime   `json:"create_date"`
 	UpdateDate    sql.NullTime   `json:"update_date"`
-	AccountID     string         `json:"account_id"`
+	CustomerID    string         `json:"customer_id"`
 	ProductsSpuID string         `json:"products_spu_id"`
 }
 

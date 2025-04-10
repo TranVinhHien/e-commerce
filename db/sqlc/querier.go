@@ -12,6 +12,7 @@ type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
+	CreateCustomerAddress(ctx context.Context, arg CreateCustomerAddressParams) error
 	CreateDescriptionAttr(ctx context.Context, arg CreateDescriptionAttrParams) error
 	CreateDiscount(ctx context.Context, arg CreateDiscountParams) error
 	CreateEmployee(ctx context.Context, arg CreateEmployeeParams) error
@@ -68,6 +69,7 @@ type Querier interface {
 	ListAccountsPaged(ctx context.Context, arg ListAccountsPagedParams) ([]Accounts, error)
 	ListActiveDiscounts(ctx context.Context) ([]Discounts, error)
 	ListCategories(ctx context.Context) ([]Categorys, error)
+	ListCategoriesByID(ctx context.Context, categoryID string) ([]Categorys, error)
 	ListCategoriesPaged(ctx context.Context, arg ListCategoriesPagedParams) ([]Categorys, error)
 	ListCustomerAddresses(ctx context.Context, customerID string) ([]CustomerAddress, error)
 	ListCustomerAddressesPaged(ctx context.Context, arg ListCustomerAddressesPagedParams) ([]CustomerAddress, error)

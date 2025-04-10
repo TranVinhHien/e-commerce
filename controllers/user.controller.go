@@ -40,19 +40,19 @@ func (api *apiController) updatePassword() func(c *gin.Context) {
 	}
 }
 
-func (api *apiController) getInfo() func(c *gin.Context) {
-	return func(ctx *gin.Context) {
-		username := ctx.Param("username")
+// func (api *apiController) getInfo() func(c *gin.Context) {
+// 	return func(ctx *gin.Context) {
+// 		username := ctx.Param("username")
 
-		result, err := api.service.GetInfo(ctx.Request.Context(), username)
+// 		result, err := api.service.InfoUser(ctx.Request.Context(), username)
 
-		if err != nil {
-			ctx.AbortWithStatusJSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
-			return
-		}
-		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("get successful", result))
-	}
-}
+//			if err != nil {
+//				ctx.AbortWithStatusJSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
+//				return
+//			}
+//			ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("get successful", result))
+//		}
+//	}
 func (api *apiController) login() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		var req controllers_model.LoginParams
@@ -127,7 +127,34 @@ func (api *apiController) newAccessToken() func(ctx *gin.Context) {
 	}
 }
 
-// ///////////////////////////////////////////////////
+// // withlogin//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//	//
+//
+// // withlogin//////////////////////////////////////////////////////////////////////////////////////////////////////////
 func (api *apiController) updateCustomer() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
@@ -152,6 +179,50 @@ func (api *apiController) updateCustomer() func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("update account success", nil))
 	}
 }
+func (api *apiController) updateCustomerAddress() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
+		var req controllers_model.CustomersAddress
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, assets_api.ResponseError(http.StatusBadRequest, err.Error()))
+			return
+		}
+		errorr := api.service.UpdateCustomerAddress(ctx, authPayload.Sub, &services.CustomerAddress{
+			PhoneNumber: req.PhoneNumber,
+			Address:     req.Address,
+			IDAddress:   req.Address_id,
+		})
+
+		if errorr != nil {
+			ctx.JSON(errorr.Code, assets_api.ResponseError(errorr.Code, errorr.Error()))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("update account success", nil))
+	}
+}
+func (api *apiController) createCustomerAddress() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
+		var req controllers_model.CustomersAddress
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			ctx.AbortWithStatusJSON(http.StatusBadRequest, assets_api.ResponseError(http.StatusBadRequest, err.Error()))
+			return
+		}
+
+		errorr := api.service.CreateCustomerAddress(ctx, authPayload.Sub, &services.CustomerAddress{
+			PhoneNumber: req.PhoneNumber,
+			Address:     req.Address,
+		})
+
+		if errorr != nil {
+			ctx.JSON(errorr.Code, assets_api.ResponseError(errorr.Code, errorr.Error()))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("create account_address success", nil))
+	}
+}
 func (api *apiController) updateCustomerAvatar() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
@@ -167,6 +238,35 @@ func (api *apiController) updateCustomerAvatar() func(ctx *gin.Context) {
 			return
 		}
 
-		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("update account success", nil))
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("update account_address success", nil))
+	}
+}
+func (api *apiController) infoUser() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
+
+		info, err := api.service.InfoUser(ctx, authPayload.Sub)
+		if err != nil {
+			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("get new Token successful", map[string]interface{}{
+			"user": info,
+		}))
+	}
+}
+
+func (api *apiController) listAddress() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		authPayload := ctx.MustGet(authorizationPayload).(*token.Payload)
+
+		addrs, err := api.service.ListAddress(ctx, authPayload.Sub)
+		if err != nil {
+			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
+			return
+		}
+
+		ctx.JSON(http.StatusOK, assets_api.SimpSuccessResponse("get new Token successful", addrs))
 	}
 }

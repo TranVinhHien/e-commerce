@@ -20,7 +20,7 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 	group.OPTIONS("/*any", api.optionss())
 	user := group.Group("/user")
 	{
-		user.GET("/getinfo/:username", api.getInfo())
+		// user.GET("/getinfo/:username", api.getInfo())
 		user.POST("/updatePassword", api.updatePassword())
 		user.POST("/login", api.login())
 		user.POST("/logout", api.logout())
@@ -31,6 +31,10 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 		{
 			user_auth.PATCH("/update_customer", api.updateCustomer())
 			user_auth.PATCH("/update_avatar_customer", api.updateCustomerAvatar())
+			user_auth.PATCH("/update_customeraddress", api.updateCustomerAddress())
+			user_auth.POST("/create_customeraddress", api.createCustomerAddress())
+			user_auth.GET("/get", api.infoUser())
+			user_auth.GET("/get_address", api.listAddress())
 		}
 	}
 
@@ -42,5 +46,9 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 	media := group.Group("/media")
 	{
 		media.GET("/images/:id", api.renderImages())
+	}
+	categories := group.Group("/categories")
+	{
+		categories.GET("/get", api.listCategories())
 	}
 }

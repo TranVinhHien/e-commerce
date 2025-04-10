@@ -9,18 +9,25 @@ import (
 
 type UserUseCase interface {
 	// without login
-	GetInfo(ctx context.Context, userName string) (map[string]interface{}, *assets_services.ServiceError)
-	UpdatePassword(ctx context.Context, userName, oldPassword, newPassword string) *assets_services.ServiceError
-	Login(ctx context.Context, userName, password string) (accessToken, refreshToken string, info map[string]interface{}, err *assets_services.ServiceError)
+	//GetInfo(ctx context.Context, customer_id string) (map[string]interface{}, *assets_services.ServiceError)
+	UpdatePassword(ctx context.Context, customer_id, oldPassword, newPassword string) *assets_services.ServiceError
+	Login(ctx context.Context, username, password string) (accessToken, refreshToken string, info map[string]interface{}, err *assets_services.ServiceError)
 	Logout(ctx context.Context, refreshToken string) *assets_services.ServiceError
-	Register(ctx context.Context, userName, password string, userInfo *services.Customers) *assets_services.ServiceError
+	Register(ctx context.Context, customer_id, password string, userInfo *services.Customers) *assets_services.ServiceError
 	NewAccessToken(ctx context.Context, refreshToken string) (token *string, err *assets_services.ServiceError)
 
 	// with login
-	UpdadateInfo(ctx context.Context, user_id string, info *services.Customers) *assets_services.ServiceError
-	UpdadateAvatar(ctx context.Context, user_id string, file *multipart.FileHeader) (err *assets_services.ServiceError)
+	UpdadateInfo(ctx context.Context, customer_id string, info *services.Customers) *assets_services.ServiceError
+	UpdadateAvatar(ctx context.Context, customer_id string, file *multipart.FileHeader) (err *assets_services.ServiceError)
+	CreateCustomerAddress(ctx context.Context, customer_id string, address_info *services.CustomerAddress) (err *assets_services.ServiceError)
+	UpdateCustomerAddress(ctx context.Context, customer_id string, address_info *services.CustomerAddress) (err *assets_services.ServiceError)
+	InfoUser(ctx context.Context, customer_id string) (info map[string]interface{}, err *assets_services.ServiceError)
+	ListAddress(ctx context.Context, customer_id string) (info map[string]interface{}, err *assets_services.ServiceError)
 }
 
 type Media interface {
 	RenderImage(ctx context.Context, filename string) string
+}
+type Categories interface {
+	GetCategoris(ctx context.Context, userName string) (map[string]interface{}, *assets_services.ServiceError)
 }

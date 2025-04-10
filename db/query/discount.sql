@@ -17,7 +17,6 @@ SET discount_code = COALESCE(sqlc.narg('discount_code'), discount_code),
     end_date = COALESCE(sqlc.narg('end_date'), end_date),
     min_order_value = COALESCE(sqlc.narg('min_order_value'), min_order_value),
     amount = COALESCE(sqlc.narg('amount'), amount),
-    status_discount = COALESCE(sqlc.narg('status_discount'), status_discount),
     update_date = NOW()
 WHERE discount_id = ?;
 
@@ -39,4 +38,3 @@ LIMIT ? OFFSET ?;
 
 -- name: ListActiveDiscounts :many
 SELECT * FROM discounts
-WHERE status_discount = 'Còn Hiệu Lực' AND end_date > NOW();

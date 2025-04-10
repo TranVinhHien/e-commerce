@@ -1,10 +1,3 @@
-    -- name: CreateCustomerAddress :exec
-INSERT INTO customer_address (
-  id_address, customer_id, address, phone_number
-) VALUES (
-  ?, ?, ?, ?
-);
-
 -- name: DeleteCustomerAddress :exec
 DELETE FROM customer_address
 WHERE id_address = ?;
@@ -29,3 +22,10 @@ SELECT * FROM customer_address
 WHERE customer_id = ?
 ORDER BY id_address
 LIMIT ? OFFSET ?;
+
+-- name: CreateCustomerAddress :exec
+INSERT INTO customer_address (
+  id_address, customer_id, address, phone_number
+) VALUES (
+  ?, ?, ?, ?
+);

@@ -10,6 +10,31 @@ import (
 	"database/sql"
 )
 
+const createCustomerAddress = `-- name: CreateCustomerAddress :exec
+INSERT INTO customer_address (
+  id_address, customer_id, address, phone_number
+) VALUES (
+  ?, ?, ?, ?
+)
+`
+
+type CreateCustomerAddressParams struct {
+	IDAddress   string `json:"id_address"`
+	CustomerID  string `json:"customer_id"`
+	Address     string `json:"address"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+func (q *Queries) CreateCustomerAddress(ctx context.Context, arg CreateCustomerAddressParams) error {
+	_, err := q.db.ExecContext(ctx, createCustomerAddress,
+		arg.IDAddress,
+		arg.CustomerID,
+		arg.Address,
+		arg.PhoneNumber,
+	)
+	return err
+}
+
 const deleteCustomerAddress = `-- name: DeleteCustomerAddress :exec
 DELETE FROM customer_address
 WHERE id_address = ?
