@@ -67,16 +67,15 @@ func (u *DescriptionAttr) Convert() services.DescriptionAttr {
 // Discount
 func (u *Discounts) Convert() services.Discounts {
 	return services.Discounts{
-		DiscountID:     u.DiscountID,
-		DiscountCode:   u.DiscountCode,
-		DiscountValue:  u.DiscountValue,
-		StartDate:      u.StartDate,
-		EndDate:        u.EndDate,
-		MinOrderValue:  u.MinOrderValue.Float64,
-		Amount:         u.Amount.Int32,
-		StatusDiscount: string(u.StatusDiscount.DiscountsStatusDiscount),
-		CreateDate:     u.CreateDate.Time,
-		UpdateDate:     services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
+		DiscountID:    u.DiscountID,
+		DiscountCode:  u.DiscountCode,
+		DiscountValue: u.DiscountValue,
+		StartDate:     u.StartDate,
+		EndDate:       u.EndDate,
+		MinOrderValue: u.MinOrderValue.Float64,
+		Amount:        u.Amount.Int32,
+		CreateDate:    u.CreateDate.Time,
+		UpdateDate:    services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
 	}
 }
 
