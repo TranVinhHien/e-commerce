@@ -25,9 +25,9 @@ startdb:
 stopdb:
 	docker stop mysql_c
 buildimg:
-	docker build -t mysql_c:latest .
+	docker build -t tranvinhhien1912/e-commerce:$(tag) 
 pushimg:
-	docker push tranvinhhien1912/mysql_c:tagname
+	docker push tranvinhhien1912/e-commerce:$(tag)
 createtb:
 	migrate -path db/migration/ -database "mysql://root:12345@tcp(localhost:3306)/e-commerce" -verbose up
 droptb:

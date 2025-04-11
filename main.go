@@ -49,7 +49,7 @@ func main() {
 		log.Err(err).Msg("Error create JWTMaker")
 		return
 	}
-	rdb, err := connectDBRedisWithRetry(5)
+	rdb, err := connectDBRedisWithRetry(5, env.RedisAddress)
 	if err != nil {
 		log.Err(err).Msg("Error when created connect to redis")
 		return
@@ -81,13 +81,13 @@ func main() {
 	engine.Run(env.HTTPServerAddress)
 
 }
-func connectDBRedisWithRetry(times int) (*redis.Client, error) {
+func connectDBRedisWithRetry(times int, redisAddress string) (*redis.Client, error) {
 	var e error
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2*time.Duration(times))
 	defer cancel()
 	for i := 1; i <= times; i++ {
 		rdb := redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
+			Addr:     redisAddress,
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		})

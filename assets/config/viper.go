@@ -18,7 +18,9 @@ type ReadENV struct {
 	Customer             string        `mapstructure:"CUSTOMER"`
 	QuanLy               string        `mapstructure:"QUANLY"`
 	NhanVien             string        `mapstructure:"NHANVIEN"`
-	ImagePath            string        `mapstructure:"IMAGE_PATH"`
+	ImagePath            string        `mapstructure:"IMAGE_PATH_AVTATAR"`
+	ImageProducts        string        `mapstructure:"IMAGE_PATH_PRODUCTS"`
+	RedisAddress         string        `mapstructure:"REDIS_ADDRESS"`
 }
 
 func LoadConfig(path string) (config ReadENV, err error) {
