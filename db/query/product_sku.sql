@@ -32,3 +32,9 @@ SELECT * FROM product_skus
 WHERE products_spu_id = ?
 ORDER BY product_sku_id
 LIMIT ? OFFSET ?;
+
+
+-- name: GetProductsBySKU :many
+SELECT * 
+FROM product_skus 
+WHERE product_sku_id IN (?);

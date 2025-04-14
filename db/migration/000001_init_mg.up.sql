@@ -185,7 +185,7 @@ CREATE TABLE purchase_order_detail (
 -- 14. Bảng order 
 CREATE TABLE `orders` (
   order_id VARCHAR(36) PRIMARY KEY,
-  order_date DATETIME DEFAULT NOW(),
+  -- order_date DATETIME DEFAULT NOW(),
   total_amount DOUBLE NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
   customer_address_id varchar(36) NOT NULL,
   discount_id VARCHAR(36),

@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CountDisscounts(ctx context.Context) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
 	CreateCustomer(ctx context.Context, arg CreateCustomerParams) error
@@ -49,6 +50,7 @@ type Querier interface {
 	GetCategory(ctx context.Context, categoryID string) (Categorys, error)
 	GetCustomer(ctx context.Context, customerID string) (Customers, error)
 	GetCustomerAddress(ctx context.Context, idAddress string) (CustomerAddress, error)
+	GetCustomerAddressByAddressAndCustomer(ctx context.Context, arg GetCustomerAddressByAddressAndCustomerParams) (GetCustomerAddressByAddressAndCustomerRow, error)
 	GetCustomerByAccountID(ctx context.Context, accountID string) (Customers, error)
 	GetDescriptionAttr(ctx context.Context, descriptionAttrID string) (DescriptionAttr, error)
 	GetDiscount(ctx context.Context, discountID string) (Discounts, error)
@@ -61,6 +63,7 @@ type Querier interface {
 	GetProductSKU(ctx context.Context, productSkuID string) (ProductSkus, error)
 	GetProductSKUAttr(ctx context.Context, productSkuAttrID string) (ProductSkuAttrs, error)
 	GetProductSPU(ctx context.Context, productsSpuID string) (ProductsSpu, error)
+	GetProductsBySKU(ctx context.Context, productSkuID string) ([]ProductSkus, error)
 	GetRating(ctx context.Context, ratingID string) (Ratings, error)
 	GetRole(ctx context.Context, roleID string) (Roles, error)
 	GetRoleAccount(ctx context.Context, roleAccountID string) (RoleAccount, error)
@@ -77,6 +80,7 @@ type Querier interface {
 	ListCustomers(ctx context.Context) ([]Customers, error)
 	ListCustomersPaged(ctx context.Context, arg ListCustomersPagedParams) ([]Customers, error)
 	ListDescriptionAttrs(ctx context.Context, productsSpuID string) ([]DescriptionAttr, error)
+	ListDiscountInusesPaged(ctx context.Context, arg ListDiscountInusesPagedParams) ([]Discounts, error)
 	ListDiscounts(ctx context.Context) ([]Discounts, error)
 	ListDiscountsPaged(ctx context.Context, arg ListDiscountsPagedParams) ([]Discounts, error)
 	ListEmployees(ctx context.Context) ([]Employees, error)
@@ -107,6 +111,7 @@ type Querier interface {
 	UpdateCustomerAddress(ctx context.Context, arg UpdateCustomerAddressParams) error
 	UpdateDescriptionAttr(ctx context.Context, arg UpdateDescriptionAttrParams) error
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) error
+	UpdateDiscountAmount(ctx context.Context, discountID string) error
 	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) error
 	UpdateOrder(ctx context.Context, arg UpdateOrderParams) error
 	UpdateOrderDetail(ctx context.Context, arg UpdateOrderDetailParams) error

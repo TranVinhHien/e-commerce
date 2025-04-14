@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+const countDisscounts = `-- name: CountDisscounts :one
+SELECT COUNT(*) as totalElements FROM discounts
+`
+
+func (q *Queries) CountDisscounts(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countDisscounts)
+	var totalelements int64
+	err := row.Scan(&totalelements)
+	return totalelements, err
+}
+
 const createDiscount = `-- name: CreateDiscount :exec
 INSERT INTO discounts (
   discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount
@@ -133,6 +144,49 @@ func (q *Queries) ListActiveDiscounts(ctx context.Context) ([]Discounts, error) 
 	return items, nil
 }
 
+const listDiscountInusesPaged = `-- name: ListDiscountInusesPaged :many
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts WHERE amount >0  
+LIMIT ? OFFSET ?
+`
+
+type ListDiscountInusesPagedParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListDiscountInusesPaged(ctx context.Context, arg ListDiscountInusesPagedParams) ([]Discounts, error) {
+	rows, err := q.db.QueryContext(ctx, listDiscountInusesPaged, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discounts
+	for rows.Next() {
+		var i Discounts
+		if err := rows.Scan(
+			&i.DiscountID,
+			&i.DiscountCode,
+			&i.DiscountValue,
+			&i.StartDate,
+			&i.EndDate,
+			&i.MinOrderValue,
+			&i.Amount,
+			&i.CreateDate,
+			&i.UpdateDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDiscounts = `-- name: ListDiscounts :many
 SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 `
@@ -172,7 +226,6 @@ func (q *Queries) ListDiscounts(ctx context.Context) ([]Discounts, error) {
 
 const listDiscountsPaged = `-- name: ListDiscountsPaged :many
 SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
-ORDER BY discount_id
 LIMIT ? OFFSET ?
 `
 
@@ -246,5 +299,17 @@ func (q *Queries) UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) 
 		arg.Amount,
 		arg.DiscountID,
 	)
+	return err
+}
+
+const updateDiscountAmount = `-- name: UpdateDiscountAmount :exec
+UPDATE discounts
+SET amount = amount - 1,
+    update_date = NOW()
+WHERE discount_id = ?
+`
+
+func (q *Queries) UpdateDiscountAmount(ctx context.Context, discountID string) error {
+	_, err := q.db.ExecContext(ctx, updateDiscountAmount, discountID)
 	return err
 }

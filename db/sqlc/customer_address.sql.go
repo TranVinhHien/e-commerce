@@ -47,7 +47,7 @@ func (q *Queries) DeleteCustomerAddress(ctx context.Context, idAddress string) e
 
 const getCustomerAddress = `-- name: GetCustomerAddress :one
 SELECT id_address, customer_id, address, phone_number, create_date, update_date FROM customer_address
-WHERE id_address = ? LIMIT 1
+WHERE id_address =  ? LIMIT 1
 `
 
 func (q *Queries) GetCustomerAddress(ctx context.Context, idAddress string) (CustomerAddress, error) {
@@ -60,6 +60,57 @@ func (q *Queries) GetCustomerAddress(ctx context.Context, idAddress string) (Cus
 		&i.PhoneNumber,
 		&i.CreateDate,
 		&i.UpdateDate,
+	)
+	return i, err
+}
+
+const getCustomerAddressByAddressAndCustomer = `-- name: GetCustomerAddressByAddressAndCustomer :one
+SELECT customer_address.id_address, customer_address.customer_id, customer_address.address, customer_address.phone_number, customer_address.create_date, customer_address.update_date,customers.customer_id, customers.name, customers.email, customers.image, customers.dob, customers.gender, customers.account_id, customers.create_date, customers.update_date FROM customer_address join  customers ON  customers.customer_id = customer_address.customer_id
+WHERE customer_address.id_address = ? AND customer_address.customer_id = ? LIMIT 1
+`
+
+type GetCustomerAddressByAddressAndCustomerParams struct {
+	IDAddress  string `json:"id_address"`
+	CustomerID string `json:"customer_id"`
+}
+
+type GetCustomerAddressByAddressAndCustomerRow struct {
+	IDAddress    string              `json:"id_address"`
+	CustomerID   string              `json:"customer_id"`
+	Address      string              `json:"address"`
+	PhoneNumber  string              `json:"phone_number"`
+	CreateDate   sql.NullTime        `json:"create_date"`
+	UpdateDate   sql.NullTime        `json:"update_date"`
+	CustomerID_2 string              `json:"customer_id_2"`
+	Name         string              `json:"name"`
+	Email        string              `json:"email"`
+	Image        sql.NullString      `json:"image"`
+	Dob          sql.NullTime        `json:"dob"`
+	Gender       NullCustomersGender `json:"gender"`
+	AccountID    string              `json:"account_id"`
+	CreateDate_2 sql.NullTime        `json:"create_date_2"`
+	UpdateDate_2 sql.NullTime        `json:"update_date_2"`
+}
+
+func (q *Queries) GetCustomerAddressByAddressAndCustomer(ctx context.Context, arg GetCustomerAddressByAddressAndCustomerParams) (GetCustomerAddressByAddressAndCustomerRow, error) {
+	row := q.db.QueryRowContext(ctx, getCustomerAddressByAddressAndCustomer, arg.IDAddress, arg.CustomerID)
+	var i GetCustomerAddressByAddressAndCustomerRow
+	err := row.Scan(
+		&i.IDAddress,
+		&i.CustomerID,
+		&i.Address,
+		&i.PhoneNumber,
+		&i.CreateDate,
+		&i.UpdateDate,
+		&i.CustomerID_2,
+		&i.Name,
+		&i.Email,
+		&i.Image,
+		&i.Dob,
+		&i.Gender,
+		&i.AccountID,
+		&i.CreateDate_2,
+		&i.UpdateDate_2,
 	)
 	return i, err
 }

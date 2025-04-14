@@ -31,3 +31,13 @@ type Media interface {
 type Categories interface {
 	GetCategoris(ctx context.Context, userName string) (map[string]interface{}, *assets_services.ServiceError)
 }
+type Discounts interface {
+	ListDiscount(ctx context.Context, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
+}
+type Payments interface {
+	ListPayment(ctx context.Context) (map[string]interface{}, *assets_services.ServiceError)
+}
+type Order interface {
+	CallBackMoMo(ctx context.Context, tran services.TransactionMoMO)
+	CreateOrder(ctx context.Context, user_id string, order *services.CreateOrderParams) (payment_url map[string]interface{}, err *assets_services.ServiceError)
+}

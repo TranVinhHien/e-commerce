@@ -51,4 +51,20 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 	{
 		categories.GET("/get", api.listCategories())
 	}
+	discount := group.Group("/discount")
+	{
+		discount.GET("/get", api.listDiscount())
+	}
+	payments := group.Group("/payments")
+	{
+		payments.GET("/get", api.listPayment())
+	}
+	order := group.Group("/order").Use(authorization(api.jwt))
+	{
+		order.POST("/create", api.createOrder())
+	}
+	ordermomo := group.Group("/ordermomo")
+	{
+		ordermomo.POST("/callback", api.callbackMoMo())
+	}
 }

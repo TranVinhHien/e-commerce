@@ -100,7 +100,6 @@ func (u *Employees) Convert() services.Employees {
 func (u *Orders) Convert() services.Orders {
 	return services.Orders{
 		OrderID:         u.OrderID,
-		OrderDate:       u.OrderDate.Time,
 		TotalAmount:     u.TotalAmount,
 		DiscountID:      services.Narg[string]{Data: u.DiscountID.String, Valid: u.DiscountID.Valid},
 		PaymentMethodID: u.PaymentMethodID,

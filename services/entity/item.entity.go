@@ -4,6 +4,29 @@ import (
 	"time"
 )
 
+type OrderDirection string
+
+const (
+	ASC  OrderDirection = "ASC"
+	DESC OrderDirection = "DESC"
+)
+
+type Condition struct {
+	Field    string      // Tên cột
+	Operator string      // Dấu so sánh (>, <, =, >=, <=, <>)
+	Value    interface{} // Giá trị so sánh
+}
+type OrderBy struct {
+	Field string         // Tên cột
+	Value OrderDirection // Giá trị so sánh
+}
+type QueryFilter struct {
+	Conditions []Condition
+	OrderBy    *OrderBy // Trường để sắp xếp
+	Page       int      // Trang hiện tại
+	PageSize   int      // Số lượng kết quả mỗi trang
+}
+
 type Users struct {
 }
 type Accounts struct {
@@ -125,7 +148,19 @@ type ProductSkus struct {
 	UpdateDate    Narg[time.Time] `json:"update_date"`
 	ProductsSpuID string          `json:"products_spu_id"`
 }
-
+type ProductSkusDetail struct {
+	ProductSkuID     string          `json:"product_sku_id"`
+	Value            string          `json:"value"`
+	SkuStock         int32           `json:"sku_stock"`
+	Price            float64         `json:"price"`
+	Sort             int32           `json:"sort"`
+	CreateDate       time.Time       `json:"create_date"`
+	UpdateDate       Narg[time.Time] `json:"update_date"`
+	ProductsSpuID    string          `json:"products_spu_id"`
+	Name             string          `json:"name"`
+	ShortDescription string          `json:"short_description"`
+	Image            string          `json:"image"`
+}
 type ProductsSpu struct {
 	ProductsSpuID    string          `json:"products_spu_id"`
 	Name             string          `json:"name"`
@@ -191,4 +226,17 @@ type Suppliers struct {
 	Address     Narg[string]    `json:"address"`
 	CreateDate  time.Time       `json:"create_date"`
 	UpdateDate  Narg[time.Time] `json:"update_date"`
+}
+
+// // struct cho những trường hợp sử lý ở db thay vì service
+type AmountProdduct struct {
+	Product_sku_id string `form:"product_sku_id" json:"product_sku_id"`
+	Amount         int    `form:"amount" json:"amount"`
+}
+
+type CreateOrderParams struct {
+	NumOfProducts []AmountProdduct `form:"num_of_products" json:"num_of_products" `
+	Discount_Id   string           `form:"discount_id" json:"discount_id"`
+	Address_id    string           `form:"address_id" json:"address_id"`
+	Payment_id    string           `form:"payment_id" json:"payment_id"`
 }

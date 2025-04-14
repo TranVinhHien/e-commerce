@@ -20,6 +20,12 @@ SET discount_code = COALESCE(sqlc.narg('discount_code'), discount_code),
     update_date = NOW()
 WHERE discount_id = ?;
 
+-- name: UpdateDiscountAmount :exec
+UPDATE discounts
+SET amount = amount - 1,
+    update_date = NOW()
+WHERE discount_id = ?;
+
 -- name: GetDiscount :one
 SELECT * FROM discounts
 WHERE discount_id = ? LIMIT 1;
@@ -33,8 +39,14 @@ SELECT * FROM discounts;
 
 -- name: ListDiscountsPaged :many
 SELECT * FROM discounts
-ORDER BY discount_id
+LIMIT ? OFFSET ?;
+
+-- name: ListDiscountInusesPaged :many
+SELECT * FROM discounts WHERE amount >0  
 LIMIT ? OFFSET ?;
 
 -- name: ListActiveDiscounts :many
-SELECT * FROM discounts
+SELECT * FROM discounts;
+
+-- name: CountDisscounts :one
+SELECT COUNT(*) as totalElements FROM discounts;

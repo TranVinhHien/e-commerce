@@ -12,19 +12,21 @@ import (
 
 const createOrder = `-- name: CreateOrder :exec
 INSERT INTO orders (
-  order_id, total_amount, customer_address_id, discount_id, payment_method_id, customer_id
+  order_id, total_amount, customer_address_id, discount_id, payment_method_id, customer_id,payment_status,order_status
 ) VALUES (
-  ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?, ?, ?
 )
 `
 
 type CreateOrderParams struct {
-	OrderID           string         `json:"order_id"`
-	TotalAmount       float64        `json:"total_amount"`
-	CustomerAddressID string         `json:"customer_address_id"`
-	DiscountID        sql.NullString `json:"discount_id"`
-	PaymentMethodID   string         `json:"payment_method_id"`
-	CustomerID        string         `json:"customer_id"`
+	OrderID           string                  `json:"order_id"`
+	TotalAmount       float64                 `json:"total_amount"`
+	CustomerAddressID string                  `json:"customer_address_id"`
+	DiscountID        sql.NullString          `json:"discount_id"`
+	PaymentMethodID   string                  `json:"payment_method_id"`
+	CustomerID        string                  `json:"customer_id"`
+	PaymentStatus     NullOrdersPaymentStatus `json:"payment_status"`
+	OrderStatus       NullOrdersOrderStatus   `json:"order_status"`
 }
 
 func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) error {
@@ -35,6 +37,8 @@ func (q *Queries) CreateOrder(ctx context.Context, arg CreateOrderParams) error 
 		arg.DiscountID,
 		arg.PaymentMethodID,
 		arg.CustomerID,
+		arg.PaymentStatus,
+		arg.OrderStatus,
 	)
 	return err
 }
@@ -52,7 +56,7 @@ func (q *Queries) DeleteOrder(ctx context.Context, orderID string) error {
 }
 
 const getOrder = `-- name: GetOrder :one
-SELECT order_id, order_date, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
+SELECT order_id, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
 WHERE order_id = ? LIMIT 1
 `
 
@@ -61,7 +65,6 @@ func (q *Queries) GetOrder(ctx context.Context, orderID string) (Orders, error) 
 	var i Orders
 	err := row.Scan(
 		&i.OrderID,
-		&i.OrderDate,
 		&i.TotalAmount,
 		&i.CustomerAddressID,
 		&i.DiscountID,
@@ -76,7 +79,7 @@ func (q *Queries) GetOrder(ctx context.Context, orderID string) (Orders, error) 
 }
 
 const listCustomerOrders = `-- name: ListCustomerOrders :many
-SELECT order_id, order_date, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
+SELECT order_id, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
 WHERE customer_id = ?
 `
 
@@ -91,7 +94,6 @@ func (q *Queries) ListCustomerOrders(ctx context.Context, customerID string) ([]
 		var i Orders
 		if err := rows.Scan(
 			&i.OrderID,
-			&i.OrderDate,
 			&i.TotalAmount,
 			&i.CustomerAddressID,
 			&i.DiscountID,
@@ -116,7 +118,7 @@ func (q *Queries) ListCustomerOrders(ctx context.Context, customerID string) ([]
 }
 
 const listOrders = `-- name: ListOrders :many
-SELECT order_id, order_date, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
+SELECT order_id, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
 `
 
 func (q *Queries) ListOrders(ctx context.Context) ([]Orders, error) {
@@ -130,7 +132,6 @@ func (q *Queries) ListOrders(ctx context.Context) ([]Orders, error) {
 		var i Orders
 		if err := rows.Scan(
 			&i.OrderID,
-			&i.OrderDate,
 			&i.TotalAmount,
 			&i.CustomerAddressID,
 			&i.DiscountID,
@@ -155,7 +156,7 @@ func (q *Queries) ListOrders(ctx context.Context) ([]Orders, error) {
 }
 
 const listOrdersPaged = `-- name: ListOrdersPaged :many
-SELECT order_id, order_date, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
+SELECT order_id, total_amount, customer_address_id, discount_id, payment_method_id, payment_status, order_status, create_date, update_date, customer_id FROM orders
 ORDER BY create_date DESC
 LIMIT ? OFFSET ?
 `
@@ -176,7 +177,6 @@ func (q *Queries) ListOrdersPaged(ctx context.Context, arg ListOrdersPagedParams
 		var i Orders
 		if err := rows.Scan(
 			&i.OrderID,
-			&i.OrderDate,
 			&i.TotalAmount,
 			&i.CustomerAddressID,
 			&i.DiscountID,
@@ -208,7 +208,6 @@ SET total_amount = COALESCE(?, total_amount),
     payment_method_id = COALESCE(?, payment_method_id),
     payment_status = COALESCE(?, payment_status),
     order_status = COALESCE(?, order_status),
-    customer_id = COALESCE(?, customer_id),
     update_date = NOW()
 WHERE order_id = ?
 `
@@ -220,7 +219,6 @@ type UpdateOrderParams struct {
 	PaymentMethodID   sql.NullString          `json:"payment_method_id"`
 	PaymentStatus     NullOrdersPaymentStatus `json:"payment_status"`
 	OrderStatus       NullOrdersOrderStatus   `json:"order_status"`
-	CustomerID        sql.NullString          `json:"customer_id"`
 	OrderID           string                  `json:"order_id"`
 }
 
@@ -232,7 +230,6 @@ func (q *Queries) UpdateOrder(ctx context.Context, arg UpdateOrderParams) error 
 		arg.PaymentMethodID,
 		arg.PaymentStatus,
 		arg.OrderStatus,
-		arg.CustomerID,
 		arg.OrderID,
 	)
 	return err

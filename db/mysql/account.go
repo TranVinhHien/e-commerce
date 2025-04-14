@@ -214,3 +214,32 @@ func (s *SQLStore) ListCustomerAddresses(ctx context.Context, customer_id string
 	}
 	return items, nil
 }
+func (s *SQLStore) CustomerAddresses(ctx context.Context, customer_id, address_id string) (info services.Customers, address services.CustomerAddress, err error) {
+	item, err := s.Queries.GetCustomerAddressByAddressAndCustomer(ctx, db.GetCustomerAddressByAddressAndCustomerParams{
+		IDAddress:  address_id,
+		CustomerID: customer_id,
+	})
+	if err != nil {
+		return services.Customers{}, services.CustomerAddress{}, err
+	}
+	infoDB := db.Customers{
+		CustomerID: item.CustomerID,
+		Name:       item.Name,
+		Email:      item.Name,
+		Image:      item.Image,
+		Dob:        item.Dob,
+		Gender:     item.Gender,
+		AccountID:  item.Name,
+		CreateDate: item.CreateDate_2,
+		UpdateDate: item.UpdateDate_2,
+	}
+	addressDB := db.CustomerAddress{
+		IDAddress:   item.IDAddress,
+		CustomerID:  item.CustomerID_2,
+		Address:     item.Address,
+		PhoneNumber: item.PhoneNumber,
+		CreateDate:  item.CreateDate,
+		UpdateDate:  item.UpdateDate,
+	}
+	return infoDB.Convert(), addressDB.Convert(), err
+}

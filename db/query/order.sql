@@ -1,8 +1,8 @@
 -- name: CreateOrder :exec
 INSERT INTO orders (
-  order_id, total_amount, customer_address_id, discount_id, payment_method_id, customer_id
+  order_id, total_amount, customer_address_id, discount_id, payment_method_id, customer_id,payment_status,order_status
 ) VALUES (
-  ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: DeleteOrder :exec
@@ -19,7 +19,6 @@ SET total_amount = COALESCE(sqlc.narg('total_amount'), total_amount),
     payment_method_id = COALESCE(sqlc.narg('payment_method_id'), payment_method_id),
     payment_status = COALESCE(sqlc.narg('payment_status'), payment_status),
     order_status = COALESCE(sqlc.narg('order_status'), order_status),
-    customer_id = COALESCE(sqlc.narg('customer_id'), customer_id),
     update_date = NOW()
 WHERE order_id = ?;
 

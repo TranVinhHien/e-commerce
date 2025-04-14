@@ -9,9 +9,12 @@ SET address = COALESCE(sqlc.narg('address'), address),
     update_date = NOW()
 WHERE id_address = ?;
 
+-- name: GetCustomerAddressByAddressAndCustomer :one
+SELECT customer_address.*,customers.* FROM customer_address join  customers ON  customers.customer_id = customer_address.customer_id
+WHERE customer_address.id_address = ? AND customer_address.customer_id = ? LIMIT 1;
 -- name: GetCustomerAddress :one
 SELECT * FROM customer_address
-WHERE id_address = ? LIMIT 1;
+WHERE id_address =  ? LIMIT 1;
 
 -- name: ListCustomerAddresses :many
 SELECT * FROM customer_address

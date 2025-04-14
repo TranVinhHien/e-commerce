@@ -433,7 +433,6 @@ type OrderDetail struct {
 
 type Orders struct {
 	OrderID           string                  `json:"order_id"`
-	OrderDate         sql.NullTime            `json:"order_date"`
 	TotalAmount       float64                 `json:"total_amount"`
 	CustomerAddressID string                  `json:"customer_address_id"`
 	DiscountID        sql.NullString          `json:"discount_id"`

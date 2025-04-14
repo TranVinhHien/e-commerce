@@ -70,6 +70,44 @@ func (q *Queries) GetProductSKU(ctx context.Context, productSkuID string) (Produ
 	return i, err
 }
 
+const getProductsBySKU = `-- name: GetProductsBySKU :many
+SELECT product_sku_id, value, sku_stock, price, sort, create_date, update_date, products_spu_id 
+FROM product_skus 
+WHERE product_sku_id IN (?)
+`
+
+func (q *Queries) GetProductsBySKU(ctx context.Context, productSkuID string) ([]ProductSkus, error) {
+	rows, err := q.db.QueryContext(ctx, getProductsBySKU, productSkuID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ProductSkus
+	for rows.Next() {
+		var i ProductSkus
+		if err := rows.Scan(
+			&i.ProductSkuID,
+			&i.Value,
+			&i.SkuStock,
+			&i.Price,
+			&i.Sort,
+			&i.CreateDate,
+			&i.UpdateDate,
+			&i.ProductsSpuID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listProductSKUs = `-- name: ListProductSKUs :many
 SELECT product_sku_id, value, sku_stock, price, sort, create_date, update_date, products_spu_id FROM product_skus
 WHERE products_spu_id = ?

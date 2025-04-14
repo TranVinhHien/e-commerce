@@ -8,13 +8,19 @@ import (
 
 type ServicesRepository interface {
 	iservices.UserRepository
-	iservices.HandleRepository
+	iservices.ProductRepository
 	iservices.CategoriesRepository
+	iservices.ĐiscountRepository
+	iservices.PaymentRepository
+	iservices.OrderRepository
 }
 type ServiceUseCase interface {
 	iservices.UserUseCase
 	iservices.Media
 	iservices.Categories
+	iservices.Discounts
+	iservices.Order
+	iservices.Payments
 }
 
 type ServicesRedis interface {

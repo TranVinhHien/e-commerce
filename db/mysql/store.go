@@ -6,6 +6,7 @@ import (
 	"fmt"
 	db "new-project/db/sqlc"
 	"new-project/services"
+	entity "new-project/services/entity"
 )
 
 type SQLStore struct {
@@ -43,4 +44,34 @@ func (s *SQLStore) execTS(ctx context.Context, fn func(tx *db.Queries) error) er
 	}
 
 	return tx.Commit()
+}
+func listData(ctx context.Context, connPool *sql.DB, table string, query entity.QueryFilter) (*sql.Rows, error) {
+	querySQL := fmt.Sprintf("SELECT *  FROM %s WHERE 1=1", table)
+	args := []interface{}{}
+
+	// Xây dựng SQL từ QueryFilter
+	for _, condition := range query.Conditions {
+		querySQL += fmt.Sprintf(" AND %s %s ?", condition.Field, condition.Operator)
+		args = append(args, condition.Value)
+	}
+
+	// Thêm sắp xếp
+	if query.OrderBy != nil {
+		querySQL += fmt.Sprintf(" ORDER BY %s %s", query.OrderBy.Field, query.OrderBy.Value)
+	}
+
+	// Thêm phân trang
+	if query.Page > 0 && query.PageSize > 0 {
+		offset := (query.Page - 1) * query.PageSize
+		querySQL += " LIMIT ? OFFSET ?"
+		args = append(args, query.PageSize, offset)
+	}
+
+	// Thực thi truy vấn
+
+	rows, err := connPool.QueryContext(ctx, querySQL, args...)
+	if err != nil {
+		return nil, err
+	}
+	return rows, nil
 }

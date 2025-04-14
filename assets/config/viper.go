@@ -21,6 +21,14 @@ type ReadENV struct {
 	ImagePath            string        `mapstructure:"IMAGE_PATH_AVTATAR"`
 	ImageProducts        string        `mapstructure:"IMAGE_PATH_PRODUCTS"`
 	RedisAddress         string        `mapstructure:"REDIS_ADDRESS"`
+	PaymentOnline        string        `mapstructure:"PAYMENT_ONLINE"`
+	PaymentOffline       string        `mapstructure:"PAYMENT_OFFLINE"`
+
+	AccessKeyMoMo string `mapstructure:"ACCESS_KEY_MOMO"`
+	SecretKeyMoMo string `mapstructure:"SECRET_KEY_MOMO"`
+	RedirectURL   string `mapstructure:"REDIRECTURL"`
+	IpnURL        string `mapstructure:"IPNURL"`
+	EndPointMoMo  string `mapstructure:"ENDPOINT_MOMO"`
 }
 
 func LoadConfig(path string) (config ReadENV, err error) {
