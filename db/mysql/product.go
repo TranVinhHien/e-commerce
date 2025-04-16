@@ -13,7 +13,12 @@ func (s *SQLStore) buildGetSKU(ctx context.Context, productSkuIDs []string) ([]P
 
 	const getProductsBySKU = `-- name: GetProductsBySKU :many
 	SELECT sku.product_sku_id, sku.value, sku.sku_stock, sku.price, sku.sort, sku.create_date, sku.update_date, sku.products_spu_id,
-	spu.name,spu.short_description,spu.image
+	spu.name,spu.short_description,spu.image,
+	 (
+      SELECT GROUP_CONCAT(CONCAT(attr.name, ':', attr.value) SEPARATOR ', ')
+      FROM product_sku_attrs AS attr
+      WHERE FIND_IN_SET(attr.product_sku_attr_id, REPLACE(sku.value, '/', ',')) > 0
+    ) AS info_sku_attr
 	FROM product_skus as sku join products_spu as spu on sku.products_spu_id = spu.products_spu_id
 	WHERE sku.product_sku_id IN (%s)
 	`
@@ -51,6 +56,7 @@ func (s *SQLStore) buildGetSKU(ctx context.Context, productSkuIDs []string) ([]P
 			&i.Name,
 			&i.ShortDescription,
 			&i.Image,
+			&i.InfoProduct,
 		); err != nil {
 			return nil, err
 		}
@@ -65,7 +71,7 @@ func (s *SQLStore) buildGetSKU(ctx context.Context, productSkuIDs []string) ([]P
 func (s *SQLStore) GetProductsBySKUs(ctx context.Context, product_sku_ids []string) (is []services.ProductSkusDetail, err error) {
 	items, err := s.buildGetSKU(ctx, product_sku_ids)
 	if err != nil {
-		log.Fatal("error when get GetProductsBySKU: ", err)
+		log.Fatal("error when get GetProductsBySKUs: ", err)
 		return nil, err
 	}
 	is = make([]services.ProductSkusDetail, len(items))
@@ -84,6 +90,7 @@ func (s *SQLStore) GetProductsBySKUs(ctx context.Context, product_sku_ids []stri
 			Name:             item.Name,
 			ShortDescription: item.ShortDescription,
 			Image:            item.Image,
+			InfoProduct:      item.InfoProduct,
 		}
 	}
 	return

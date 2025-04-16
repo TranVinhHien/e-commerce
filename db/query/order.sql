@@ -37,3 +37,10 @@ LIMIT ? OFFSET ?;
 -- name: ListCustomerOrders :many
 SELECT * FROM orders
 WHERE customer_id = ?;
+
+-- name: CheckUserOrder :one
+select count(*) as checks from orders as o 
+join order_detail as od  on  o.order_id= od.order_id
+join  product_skus as  psku on   psku.product_sku_id= od.product_sku_id
+where  o.customer_id=  ? and  ? in (psku.products_spu_id);
+

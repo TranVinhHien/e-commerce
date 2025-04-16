@@ -45,14 +45,18 @@ func (s *SQLStore) execTS(ctx context.Context, fn func(tx *db.Queries) error) er
 
 	return tx.Commit()
 }
-func listData(ctx context.Context, connPool *sql.DB, table string, query entity.QueryFilter) (*sql.Rows, error) {
+func listData(ctx context.Context, connPool *sql.DB, table string, query entity.QueryFilter) (*sql.Rows, int, error) {
 	querySQL := fmt.Sprintf("SELECT *  FROM %s WHERE 1=1", table)
+	querySQLCount := fmt.Sprintf("SELECT COUNT(*) as totalElements  FROM %s WHERE 1=1", table)
 	args := []interface{}{}
+	argsCount := []interface{}{}
 
 	// Xây dựng SQL từ QueryFilter
 	for _, condition := range query.Conditions {
 		querySQL += fmt.Sprintf(" AND %s %s ?", condition.Field, condition.Operator)
+		querySQLCount += fmt.Sprintf(" AND %s %s ?", condition.Field, condition.Operator)
 		args = append(args, condition.Value)
+		argsCount = append(argsCount, condition.Value)
 	}
 
 	// Thêm sắp xếp
@@ -71,7 +75,14 @@ func listData(ctx context.Context, connPool *sql.DB, table string, query entity.
 
 	rows, err := connPool.QueryContext(ctx, querySQL, args...)
 	if err != nil {
-		return nil, err
+		return nil, 0, fmt.Errorf("error connPool.QueryContext: %s", err.Error())
 	}
-	return rows, nil
+	row := connPool.QueryRowContext(ctx, querySQLCount, argsCount...)
+	var sc int64
+	err = row.Scan(&sc)
+	if err != nil {
+		return nil, 0, fmt.Errorf("error row.Scan totalElements: %s", err.Error())
+	}
+	totalElements := int(sc)
+	return rows, totalElements, nil
 }

@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func createMoMoPayload(info services.Customers, address services.CustomerAddress, env config_assets.ReadENV, items []services.Product_MOMO, orderDT *services.Orders) services.Payload_MOMO {
+func createMoMoPayload(env config_assets.ReadENV, payloadd services.CombinedDataPayLoadMoMo) services.Payload_MOMO {
 
 	var partnerCode = "MOMO"
 	var extraData = ""
@@ -28,14 +28,14 @@ func createMoMoPayload(info services.Customers, address services.CustomerAddress
 	var autoCapture = true
 	var lang = "vi"
 	var requestType = "payWithMethod"
-	var amount = strconv.Itoa(int(orderDT.TotalAmount))
-	var orderId = orderDT.OrderID
+	var amount = strconv.Itoa(int(payloadd.OrderTX.TotalAmount))
+	var orderId = uuid.New().String()
 	var orderInfo = fmt.Sprintf("Thanh toán %s VNĐ cho đơn hàng : %s", amount, orderId)
 	var accessKey = env.AccessKeyMoMo
 	var secretKey = env.SecretKeyMoMo
 	var redirectUrl = env.RedirectURL
 	var ipnUrl = env.IpnURL
-	var requestId = orderDT.OrderID
+	var requestId = payloadd.OrderTX.OrderID
 
 	var rawSignature bytes.Buffer
 	rawSignature.WriteString("accessKey=")
@@ -85,11 +85,11 @@ func createMoMoPayload(info services.Customers, address services.CustomerAddress
 		OrderInfo:    orderInfo,
 		ExtraData:    extraData,
 		Signature:    signature,
-		Items:        items,
+		Items:        payloadd.Items,
 		UserInfo: services.User_MOMO{
-			Name:        info.Name,
-			PhoneNumber: address.PhoneNumber,
-			Email:       address.Address,
+			Name:        payloadd.Info.Name,
+			PhoneNumber: payloadd.Address.PhoneNumber,
+			Email:       payloadd.Address.Address,
 		},
 	}
 
@@ -97,6 +97,11 @@ func createMoMoPayload(info services.Customers, address services.CustomerAddress
 }
 
 func (s *service) CreateOrder(ctx context.Context, user_id string, order *services.CreateOrderParams) (map[string]interface{}, *assets_services.ServiceError) {
+	// check neu co order thi khong cho nguoi dung thanh toan
+	if vl, _ := s.redis.GetOrderOnline(ctx, user_id); vl != nil {
+		return nil, assets_services.NewError(400, fmt.Errorf("bạn còn order:  %s chưa được thanh toán", vl.OrderTX.OrderID))
+	}
+
 	// lay thong tin dia chi nguoi dung va kiem tra hop le
 	info, address, err := s.repository.CustomerAddresses(ctx, user_id, order.Address_id)
 	if err != nil {
@@ -205,40 +210,117 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 	}
 	// sử lý thanh toán momo
 	if order.Payment_id == s.env.PaymentOnline {
-		payload := createMoMoPayload(info, address, s.env, orderDetailMOMO, orderTX)
-
-		var jsonPayload []byte
-		var err error
-		jsonPayload, err = json.Marshal(payload)
-		if err != nil {
-			return nil, assets_services.NewError(400, fmt.Errorf("error when json.Marshal %s", err.Error()))
+		payloadParamsMoMo := services.CombinedDataPayLoadMoMo{
+			Info:    info,
+			Address: address,
+			OrderTX: orderTX,
+			Items:   orderDetailMOMO,
 		}
-		//send HTTP to momo endpoint
-		resp, err := http.Post(s.env.EndPointMoMo, "application/json", bytes.NewBuffer(jsonPayload))
-		if err != nil {
-			return nil, assets_services.NewError(400, fmt.Errorf("error when send HTTP to momo endpoint: %s", err.Error()))
-		}
-
-		//result
-		var result map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&result)
-		return result, nil
+		payload := createMoMoPayload(s.env, payloadParamsMoMo)
+		defer s.redis.AddOrderOnline(ctx, user_id, payloadParamsMoMo, s.env.OrderDuration)
+		return callMoMoGetURL(s.env, payload)
 	}
 
 	return nil, nil
 }
 func (s *service) CallBackMoMo(ctx context.Context, tran services.TransactionMoMO) {
 	// su ly api thanh cong
-	fmt.Println("da vao serrvice")
 	if tran.ResultCode == 0 {
-
+		s.redis.DeleteOrderOnline(ctx, tran.RequestID)
 		// s.repository
 		// caapj nhat cot
 		s.repository.UpdateOrder(ctx, services.Orders{
-			OrderID:       tran.OrderID,
+			OrderID:       tran.RequestID,
 			PaymentStatus: assets_services.OrderTable_PaymentStatus_DaThanhToan,
 		})
 		// send email to
 	}
 	// su ly api that bai
+}
+func (s *service) ListOrderByUserID(ctx context.Context, user_id string, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError) {
+	// query.Conditions = []services.Condition{
+	// 	{Field: "amount", Operator: ">=", Value: 1},
+	// 	{Field: "end_date", Operator: ">", Value: time.Now()},
+	// }
+	orders, totalPages, totalElements, err := s.repository.GetOrdersByUserID(ctx, user_id, query)
+	if err != nil {
+		fmt.Println("Error ListDiscount:", err)
+		return nil, assets_services.NewError(400, err)
+	}
+
+	result, err := assets_services.HideFields(orders, "orders", "customer_id")
+	if err != nil {
+		fmt.Println("Error HideFields:", err)
+		return nil, assets_services.NewError(400, err)
+	}
+	result["currentPage"] = query.Page
+	result["totalPages"] = totalPages
+	result["totalElements"] = totalElements
+	result["limit"] = query.PageSize
+	// result["orderDetail"] = orderDetail
+	return result, nil
+}
+
+func callMoMoGetURL(env config_assets.ReadENV, payload services.Payload_MOMO) (map[string]interface{}, *assets_services.ServiceError) {
+
+	var jsonPayload []byte
+	var err error
+	jsonPayload, err = json.Marshal(payload)
+	if err != nil {
+		return nil, assets_services.NewError(400, fmt.Errorf("error when json.Marshal %s", err.Error()))
+	}
+	//send HTTP to momo endpoint
+	resp, err := http.Post(env.EndPointMoMo, "application/json", bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, assets_services.NewError(400, fmt.Errorf("error when send HTTP to momo endpoint: %s", err.Error()))
+	}
+
+	//result
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	return result, nil
+}
+
+// func có đơn hàng nào đang chưa được thanh toán hay không
+// nếu có thì tạo url tới momo trả về để người dùng thanh toán
+// nếu không có trả về 204
+func (s *service) GetURLOrderMoMOAgain(ctx context.Context, user_id string) (map[string]interface{}, *assets_services.ServiceError) {
+	// check neu co order thi khong cho nguoi dung thanh toan
+	payloadParamsMoMo, err := s.redis.GetOrderOnline(ctx, user_id)
+	// return nil, assets_services.NewError(400, fmt.Errorf("bạn còn order:  %s chưa được thanh toán", vl.OrderID))
+	if err != nil {
+		return nil, assets_services.NewError(400, fmt.Errorf("error redis.GetOrderOnline:  %s ", err.Error()))
+	}
+	payload := createMoMoPayload(s.env, *payloadParamsMoMo)
+	return callMoMoGetURL(s.env, payload)
+}
+
+func (s *service) RemoveOrderOnline(ctx context.Context, orderIDs string) {
+
+	s.repository.UpdateOrder(ctx, services.Orders{
+		OrderID:       orderIDs,
+		PaymentStatus: assets_services.OrderTable_PaymentStatus_ThanhToanHetHang,
+	})
+}
+
+func (s *service) CancelOrder(ctx context.Context, user_id, orderID string) *assets_services.ServiceError {
+	order, err := s.repository.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return assets_services.NewError(400, fmt.Errorf("error repository.GetOrderByID:  %s ", err.Error()))
+	}
+	if order.CustomerID != user_id {
+		return assets_services.NewError(400, fmt.Errorf("bạn không có quyền hủy đơn hàng này"))
+	}
+	// chir  cho don hang co trang thai cho xac nhan thi moi cho huy, con lai khong cho huy
+	if order.OrderStatus != assets_services.OrderTable_OrderStatus_ChoXacNhan {
+		return assets_services.NewError(400, fmt.Errorf("bạn không thể thể hủy đơn hàng này, trạng thái không phù hợp "))
+	}
+	if order.PaymentMethodID == s.env.PaymentOnline {
+		return assets_services.NewError(400, fmt.Errorf("bạn không thể thể hủy đơn hàng thanh toán online, vui lòng liên hệ nhân viên tư vấn đề sử lý"))
+	}
+	s.repository.UpdateOrder(ctx, services.Orders{
+		OrderID:     orderID,
+		OrderStatus: assets_services.OrderTable_OrderStatus_DaHuy,
+	})
+	return nil
 }

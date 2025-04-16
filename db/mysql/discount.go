@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"math"
 	db "new-project/db/sqlc"
 	services "new-project/services/entity"
@@ -18,7 +17,7 @@ func (s *SQLStore) Discount(ctx context.Context, discount string) (i services.Di
 
 func (s *SQLStore) ListDiscount(ctx context.Context, query services.QueryFilter) (items []services.Discounts, totalPages, totalElements int, err error) {
 	table_text := "discounts"
-	rows, err := listData(ctx, s.connPool, table_text, query)
+	rows, totalElements, err := listData(ctx, s.connPool, table_text, query)
 	if err != nil {
 		return nil, -1, -1, err
 	}
@@ -47,15 +46,7 @@ func (s *SQLStore) ListDiscount(ctx context.Context, query services.QueryFilter)
 	for i, item := range is {
 		items[i] = item.Convert()
 	}
-	count_sql := fmt.Sprintf("SELECT COUNT(*) as totalElements FROM %s", table_text)
 
-	row := s.connPool.QueryRowContext(ctx, count_sql)
-	var sc int64
-	err = row.Scan(&sc)
-	totalElements = int(sc)
-	if err != nil {
-		return nil, -1, -1, err
-	}
 	pages := (float64(totalElements) - 1) / float64(query.PageSize)
 	totalPages = int(math.Ceil(pages))
 

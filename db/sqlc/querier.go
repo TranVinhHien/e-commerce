@@ -9,6 +9,7 @@ import (
 )
 
 type Querier interface {
+	CheckUserOrder(ctx context.Context, arg CheckUserOrderParams) (int64, error)
 	CountDisscounts(ctx context.Context) (int64, error)
 	CreateAccount(ctx context.Context, arg CreateAccountParams) error
 	CreateCategory(ctx context.Context, arg CreateCategoryParams) error
@@ -86,6 +87,7 @@ type Querier interface {
 	ListEmployees(ctx context.Context) ([]Employees, error)
 	ListEmployeesPaged(ctx context.Context, arg ListEmployeesPagedParams) ([]Employees, error)
 	ListOrderDetails(ctx context.Context, orderID string) ([]OrderDetail, error)
+	ListOrderDetailsByOrderID(ctx context.Context, orderID string) ([]OrderDetail, error)
 	ListOrders(ctx context.Context) ([]Orders, error)
 	ListOrdersPaged(ctx context.Context, arg ListOrdersPagedParams) ([]Orders, error)
 	ListPaymentMethods(ctx context.Context) ([]PaymentMethods, error)

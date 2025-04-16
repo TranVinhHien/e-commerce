@@ -62,9 +62,20 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 	order := group.Group("/order").Use(authorization(api.jwt))
 	{
 		order.POST("/create", api.createOrder())
+		order.GET("/myorder", api.getMyOrders())
+		order.GET("/order_online", api.getOrderOnline())
+		order.PUT("/cancel_order", api.cancelOrder())
 	}
 	ordermomo := group.Group("/ordermomo")
 	{
 		ordermomo.POST("/callback", api.callbackMoMo())
+	}
+	rating := group.Group("/rating")
+	{
+		rating.GET("/list_rating", api.listRating())
+		rating_auth := rating.Group("/auth").Use(authorization(api.jwt))
+		{
+			rating_auth.POST("/create", api.createRating())
+		}
 	}
 }

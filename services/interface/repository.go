@@ -38,8 +38,18 @@ type PaymentRepository interface {
 type OrderRepository interface {
 	TXCreateOrdder(ctx context.Context, order *services.Orders, orderDetail []services.OrderDetail) (err error)
 	UpdateOrder(ctx context.Context, order services.Orders) (err error)
+	GetOrdersByUserID(ctx context.Context, userID string, query services.QueryFilter) (items []services.Orders, totalPages, totalElements int, err error)
+	GetOrderDetailByOrderIDs(ctx context.Context, orderIDs []string) (is []services.OrderDetail, err error)
+	GetOrderByID(ctx context.Context, orderID string) (i services.Orders, err error)
+
+	CheckUserOrder(ctx context.Context, userID, products_spu_id string) (count int64, err error)
 }
 
 type ProductRepository interface {
 	GetProductsBySKUs(ctx context.Context, product_sku_ids []string) (is []services.ProductSkusDetail, err error)
+}
+
+type RatingRepository interface {
+	GetRatings(ctx context.Context, query services.QueryFilter) (items []services.Ratings, totalPages, totalElements int, err error)
+	CreateRating(ctx context.Context, rating services.Ratings) (err error)
 }

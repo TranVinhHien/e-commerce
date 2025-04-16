@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	db "new-project/db/sqlc"
 	services "new-project/services/entity"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -242,4 +244,65 @@ func (s *SQLStore) CustomerAddresses(ctx context.Context, customer_id, address_i
 		UpdateDate:  item.UpdateDate,
 	}
 	return infoDB.Convert(), addressDB.Convert(), err
+}
+
+func (s *SQLStore) buildGetCustomerAddress(ctx context.Context, ids []string) ([]db.CustomerAddress, error) {
+
+	const querySQL = `-- name: GetAddressID :many
+	SELECT id_address, customer_id,address, phone_number, create_date, update_date FROM customer_address
+	WHERE id_address IN (%s)
+	`
+
+	placeholders := make([]string, len(ids))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+	query := fmt.Sprintf(querySQL, strings.Join(placeholders, ","))
+	fmt.Println("query", query)
+	// Chuyển đổi danh sách thành các tham số cho câu lệnh SQL
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		args[i] = id
+	}
+
+	rows, err := s.connPool.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []db.CustomerAddress
+	for rows.Next() {
+		var i db.CustomerAddress
+		if err := rows.Scan(
+			&i.IDAddress,
+			&i.CustomerID,
+			&i.Address,
+			&i.PhoneNumber,
+			&i.CreateDate,
+			&i.UpdateDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (s *SQLStore) GetCustomerAddresss(ctx context.Context, address_id []string) (is []services.CustomerAddress, err error) {
+	items, err := s.buildGetCustomerAddress(ctx, address_id)
+	if err != nil {
+		log.Fatal("error when get GetCustomerAddresss: ", err)
+		return nil, err
+	}
+	is = make([]services.CustomerAddress, len(items))
+
+	// Duyệt và chuyển đổi
+	for i, item := range items {
+		is[i] = item.Convert()
+	}
+	return
 }

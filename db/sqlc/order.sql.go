@@ -10,6 +10,25 @@ import (
 	"database/sql"
 )
 
+const checkUserOrder = `-- name: CheckUserOrder :one
+select count(*) as checks from orders as o 
+join order_detail as od  on  o.order_id= od.order_id
+join  product_skus as  psku on   psku.product_sku_id= od.product_sku_id
+where  o.customer_id=  ? and  ? in (psku.products_spu_id)
+`
+
+type CheckUserOrderParams struct {
+	CustomerID    string `json:"customer_id"`
+	ProductsSpuID string `json:"products_spu_id"`
+}
+
+func (q *Queries) CheckUserOrder(ctx context.Context, arg CheckUserOrderParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, checkUserOrder, arg.CustomerID, arg.ProductsSpuID)
+	var checks int64
+	err := row.Scan(&checks)
+	return checks, err
+}
+
 const createOrder = `-- name: CreateOrder :exec
 INSERT INTO orders (
   order_id, total_amount, customer_address_id, discount_id, payment_method_id, customer_id,payment_status,order_status

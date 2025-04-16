@@ -16,4 +16,5 @@ type ProductSkusDetailss struct {
 	Name             string        `json:"name"`
 	ShortDescription string        `json:"short_description"`
 	Image            string        `json:"image"`
+	InfoProduct      string        `json:"info_sku_attr"`
 }

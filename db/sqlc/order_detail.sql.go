@@ -99,6 +99,40 @@ func (q *Queries) ListOrderDetails(ctx context.Context, orderID string) ([]Order
 	return items, nil
 }
 
+const listOrderDetailsByOrderID = `-- name: ListOrderDetailsByOrderID :many
+SELECT order_detail_id, quantity, unit_price, product_sku_id, order_id FROM order_detail
+WHERE order_id in  (?)
+`
+
+func (q *Queries) ListOrderDetailsByOrderID(ctx context.Context, orderID string) ([]OrderDetail, error) {
+	rows, err := q.db.QueryContext(ctx, listOrderDetailsByOrderID, orderID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []OrderDetail
+	for rows.Next() {
+		var i OrderDetail
+		if err := rows.Scan(
+			&i.OrderDetailID,
+			&i.Quantity,
+			&i.UnitPrice,
+			&i.ProductSkuID,
+			&i.OrderID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateOrderDetail = `-- name: UpdateOrderDetail :exec
 UPDATE order_detail
 SET quantity = COALESCE(?, quantity),

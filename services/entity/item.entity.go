@@ -13,7 +13,7 @@ const (
 
 type Condition struct {
 	Field    string      // Tên cột
-	Operator string      // Dấu so sánh (>, <, =, >=, <=, <>)
+	Operator string      // Dấu so sánh (>, <, =, >=, <=, !=)
 	Value    interface{} // Giá trị so sánh
 }
 type OrderBy struct {
@@ -103,25 +103,28 @@ type Employees struct {
 }
 
 type OrderDetail struct {
-	OrderDetailID string  `json:"order_detail_id"`
-	Quantity      int32   `json:"quantity"`
-	UnitPrice     float64 `json:"unit_price"`
-	ProductSkuID  string  `json:"product_sku_id"`
-	OrderID       string  `json:"order_id"`
+	OrderDetailID string                  `json:"order_detail_id"`
+	Quantity      int32                   `json:"quantity"`
+	UnitPrice     float64                 `json:"unit_price"`
+	ProductSkuID  string                  `json:"product_sku_id"`
+	OrderID       string                  `json:"order_id"`
+	ProductSKU    Narg[ProductSkusDetail] `json:"product_info"`
 }
 
 type Orders struct {
-	OrderID           string          `json:"order_id"`
-	OrderDate         time.Time       `json:"order_date"`
-	TotalAmount       float64         `json:"total_amount"`
-	CustomerAddressID string          `json:"customer_address_id"`
-	DiscountID        Narg[string]    `json:"discount_id"`
-	PaymentMethodID   string          `json:"payment_method_id"`
-	PaymentStatus     string          `json:"payment_status"`
-	OrderStatus       string          `json:"order_status"`
-	CreateDate        time.Time       `json:"create_date"`
-	UpdateDate        Narg[time.Time] `json:"update_date"`
-	CustomerID        string          `json:"customer_id"`
+	OrderID           string                `json:"order_id"`
+	OrderDate         time.Time             `json:"order_date"`
+	TotalAmount       float64               `json:"total_amount"`
+	CustomerAddressID string                `json:"customer_address_id"`
+	DiscountID        Narg[string]          `json:"discount_id"`
+	PaymentMethodID   string                `json:"payment_method_id"`
+	PaymentStatus     string                `json:"payment_status"`
+	OrderStatus       string                `json:"order_status"`
+	CreateDate        time.Time             `json:"create_date"`
+	UpdateDate        Narg[time.Time]       `json:"update_date"`
+	CustomerID        string                `json:"customer_id"`
+	OrderDetail       []OrderDetail         `json:"order_detail"`
+	Address           Narg[CustomerAddress] `json:"customer_address"`
 }
 
 type PaymentMethods struct {
@@ -160,6 +163,7 @@ type ProductSkusDetail struct {
 	Name             string          `json:"name"`
 	ShortDescription string          `json:"short_description"`
 	Image            string          `json:"image"`
+	InfoProduct      string          `json:"info_sku_attr"`
 }
 type ProductsSpu struct {
 	ProductsSpuID    string          `json:"products_spu_id"`
@@ -202,7 +206,7 @@ type Ratings struct {
 	Star          int32           `json:"star"`
 	CreateDate    time.Time       `json:"create_date"`
 	UpdateDate    Narg[time.Time] `json:"update_date"`
-	AccountID     string          `json:"account_id"`
+	CustomerID    string          `json:"custonmer_id"`
 	ProductsSpuID string          `json:"products_spu_id"`
 }
 
@@ -230,13 +234,13 @@ type Suppliers struct {
 
 // // struct cho những trường hợp sử lý ở db thay vì service
 type AmountProdduct struct {
-	Product_sku_id string `form:"product_sku_id" json:"product_sku_id"`
-	Amount         int    `form:"amount" json:"amount"`
+	Product_sku_id string ` json:"product_sku_id"`
+	Amount         int    `json:"amount"`
 }
 
 type CreateOrderParams struct {
-	NumOfProducts []AmountProdduct `form:"num_of_products" json:"num_of_products" `
-	Discount_Id   string           `form:"discount_id" json:"discount_id"`
-	Address_id    string           `form:"address_id" json:"address_id"`
-	Payment_id    string           `form:"payment_id" json:"payment_id"`
+	NumOfProducts []AmountProdduct ` json:"num_of_products" `
+	Discount_Id   string           ` json:"discount_id"`
+	Address_id    string           `json:"address_id"`
+	Payment_id    string           `json:"payment_id"`
 }

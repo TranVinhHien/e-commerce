@@ -26,3 +26,8 @@ redis:
     go get github.com/redis/go-redis/v9
 gocron: // jobs scheduling package
     go get github.com/go-co-op/gocron/v2
+
+
+
+CONFIG SET notify-keyspace-events Ex //cài đặt pub/sub
+

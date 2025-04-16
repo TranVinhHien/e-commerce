@@ -190,7 +190,7 @@ CREATE TABLE `orders` (
   customer_address_id varchar(36) NOT NULL,
   discount_id VARCHAR(36),
   payment_method_id VARCHAR(36) NOT NULL,
-  payment_status ENUM('Chờ Thanh Toán','Thanh Toán Trực Tiếp', 'Đã Thanh Toán') DEFAULT 'Chờ Thanh Toán',
+  payment_status ENUM('Thanh Toán Hết Hạn','Chờ Thanh Toán','Thanh Toán Trực Tiếp', 'Đã Thanh Toán') DEFAULT 'Chờ Thanh Toán',
   order_status ENUM('Đã Hủy', 'Chờ Xác Nhận', 'Đã Xác Nhận', 'Đã Giao Hàng') DEFAULT 'Chờ Xác Nhận',
   create_date DATETIME DEFAULT NOW(),
   update_date DATETIME DEFAULT NOW(),

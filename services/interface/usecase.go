@@ -38,6 +38,14 @@ type Payments interface {
 	ListPayment(ctx context.Context) (map[string]interface{}, *assets_services.ServiceError)
 }
 type Order interface {
+	ListOrderByUserID(ctx context.Context, user_id string, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
 	CallBackMoMo(ctx context.Context, tran services.TransactionMoMO)
 	CreateOrder(ctx context.Context, user_id string, order *services.CreateOrderParams) (payment_url map[string]interface{}, err *assets_services.ServiceError)
+	GetURLOrderMoMOAgain(ctx context.Context, user_id string) (map[string]interface{}, *assets_services.ServiceError)
+	RemoveOrderOnline(ctx context.Context, orderIDs string)
+	CancelOrder(ctx context.Context, userID, order_id string) *assets_services.ServiceError
+}
+type RaTings interface {
+	ListRating(ctx context.Context, products_spu_id string, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
+	CreateRating(ctx context.Context, userID string, rating services.Ratings) *assets_services.ServiceError
 }

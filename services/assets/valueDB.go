@@ -27,6 +27,7 @@ const (
 	OrderTable_PaymentStatus_ChoThanhToan      = "Chờ Thanh Toán"
 	OrderTable_PaymentStatus_ThanhToanTrucTiep = "Thanh Toán Trực Tiếp"
 	OrderTable_PaymentStatus_DaThanhToan       = "Đã Thanh Toán"
+	OrderTable_PaymentStatus_ThanhToanHetHang  = "Thanh Toán Hết Hạn"
 )
 const (
 	OrderTable_OrderStatus_DaHuy      = "Đã Hủy"

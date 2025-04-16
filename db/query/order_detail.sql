@@ -24,3 +24,7 @@ WHERE order_detail_id = ? LIMIT 1;
 -- name: ListOrderDetails :many
 SELECT * FROM order_detail
 WHERE order_id = ?;
+
+-- name: ListOrderDetailsByOrderID :many
+SELECT * FROM order_detail
+WHERE order_id in  (?);

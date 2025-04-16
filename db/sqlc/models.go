@@ -184,6 +184,7 @@ func (ns NullOrdersOrderStatus) Value() (driver.Value, error) {
 type OrdersPaymentStatus string
 
 const (
+	OrdersPaymentStatusThanhTonHtHn   OrdersPaymentStatus = "Thanh Toán Hết Hạn"
 	OrdersPaymentStatusChThanhTon     OrdersPaymentStatus = "Chờ Thanh Toán"
 	OrdersPaymentStatusThanhTonTrcTip OrdersPaymentStatus = "Thanh Toán Trực Tiếp"
 	OrdersPaymentStatusThanhTon       OrdersPaymentStatus = "Đã Thanh Toán"

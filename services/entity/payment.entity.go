@@ -18,6 +18,7 @@ type User_MOMO struct {
 	PhoneNumber string `json:"phoneNumber"` // Số điện thoại của người dùng
 	Email       string `json:"email"`       // Email của người dùng
 }
+
 type Payload_MOMO struct {
 	PartnerCode  string         `json:"partnerCode"`
 	AccessKey    string         `json:"accessKey"`
@@ -54,4 +55,10 @@ type TransactionMoMO struct {
 	Signature     string  `json:"signature"`    // Chuỗi chữ ký xác thực
 	TransactionID float64 `json:"transId"`      // ID giao dịch
 
+}
+type CombinedDataPayLoadMoMo struct {
+	Info    Customers       `json:"info"`
+	Address CustomerAddress `json:"address"`
+	Items   []Product_MOMO  `json:"items"`
+	OrderTX *Orders         `json:"orderTX"`
 }

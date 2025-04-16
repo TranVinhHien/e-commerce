@@ -11,3 +11,7 @@ type OrderParams struct {
 	Address_id    string           `form:"address_id" json:"address_id" binding:"required"`
 	Payment_id    string           `form:"payment_id" json:"payment_id" binding:"required"`
 }
+
+type OrderIDParams struct {
+	OrderID string `form:"order_id" json:"order_id" binding:"required"`
+}

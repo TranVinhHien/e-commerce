@@ -49,3 +49,26 @@ func TestSubmitOrder(t *testing.T) {
 
 	require.True(t, true, "Test category not found in retrieved categories")
 }
+
+func TestListOrderByUserID(t *testing.T) {
+	// Create a test context
+	ctx := context.Background()
+	user_id := "9930"
+	orders, err := testService.ListOrderByUserID(ctx, user_id, services.QueryFilter{
+		Conditions: []services.Condition{
+			{Field: "total_amount", Operator: ">=", Value: 10},
+			// {Field: "end_date", Operator: ">=", Value: time.Now()},
+			// {Field: "start_date", Operator: "=", Value: time.Now()},
+		},
+		// OrderBy: &services.OrderBy{
+		// 	// Field: "create_date",
+		// 	// Value: "ASC",
+		// },
+		Page:     1,
+		PageSize: 10,
+	})
+	require.Nil(t, err)
+	require.Empty(t, orders)
+
+	require.True(t, true, "Test category not found in retrieved orders")
+}

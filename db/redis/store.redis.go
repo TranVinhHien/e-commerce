@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"new-project/services"
 	modelServices "new-project/services/entity"
+	"strings"
 	"time"
 
 	"github.com/go-co-op/gocron/v2"
@@ -35,6 +36,65 @@ func (s *RedisDB) addScoreMember(ctx context.Context, zsetKey, token string, exp
 		return fmt.Errorf("error when add new item %s: to key storeMember:%s ,err: %v", token, zsetKey, err)
 	}
 	return nil
+}
+
+// Hàm thêm token vào ZSET với thời gian hết hạn
+func (s *RedisDB) AddOrderOnline(ctx context.Context, user_id string, payload modelServices.CombinedDataPayLoadMoMo, duration time.Duration) error {
+	jsonValue, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("lỗi khi chuyển CombinedDataPayLoadMoMo sang JSON: %v", err)
+	}
+	value := string(jsonValue)
+	errRedis := s.client.Set(ctx, OrderOnline+user_id+"_"+payload.OrderTX.OrderID, value, duration)
+	if errRedis != nil {
+		return fmt.Errorf("error AddOrderOnline when add new item %s: to key :%s ,err: %v", user_id, value, errRedis)
+	}
+	return nil
+}
+
+func (s *RedisDB) GetOrderOnline(ctx context.Context, user_id string) (payload *modelServices.CombinedDataPayLoadMoMo, err error) {
+	// value, errRedis := s.client.Get(ctx, OrderOnline+user_id).Result()
+	// if errRedis != nil {
+	// 	return nil, fmt.Errorf("error GetOrderOnline  key :%s ,err: %v", user_id, errRedis)
+	// }
+	// if value == "" {
+	// 	return nil, nil
+	// }
+	// err = json.Unmarshal([]byte(value), &payload)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("lỗi chuyển đổi JSON: %v", err)
+	// }
+	// return
+	pattern := fmt.Sprintf("%s%s_*", OrderOnline, user_id)
+
+	// Sử dụng SCAN để tìm key đầu tiên phù hợp
+	var firstKey string
+	var cursor uint64 = 0
+
+	// Lấy 1 key mỗi lần quét
+	keys, _, err := s.client.Scan(ctx, cursor, pattern, 1).Result()
+	if err != nil {
+		return nil, fmt.Errorf("lỗi quét key với pattern %s: %w", pattern, err)
+	}
+	if len(keys) == 0 {
+		// Không tìm thấy key nào, trả về nil
+		return nil, nil
+	}
+	firstKey = keys[0]
+
+	// Lấy giá trị của key đầu tiên tìm thấy
+	value, errRedis := s.client.Get(ctx, firstKey).Result()
+	if errRedis != nil {
+		return nil, fmt.Errorf("lỗi GetOrderOnline key: %s, err: %v", firstKey, errRedis)
+	}
+	if value == "" {
+		return nil, nil
+	}
+	err = json.Unmarshal([]byte(value), &payload)
+	if err != nil {
+		return nil, fmt.Errorf("lỗi chuyển đổi JSON: %v", err)
+	}
+	return payload, nil
 }
 
 // scan item expired and remove it
@@ -155,68 +215,6 @@ func (s *RedisDB) RemoveCategories(ctx context.Context) error {
 	return s.client.Del(ctx, CategoryDataKey).Err()
 
 }
-
-// // GetCategoryTree lấy danh sách danh mục dạng cây từ Redis
-// func (s *RedisDB) GetCategoryTree(ctx context.Context, rootID string) ([]modelServices.Categorys, error) {
-// 	// Lấy toàn bộ dữ liệu danh mục từ Redis
-// 	dataMap, err := s.client.HGetAll(ctx, CategoryDataKey).Result()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to get category data: %w", err)
-// 	}
-
-// 	// Lấy toàn bộ dữ liệu con từ Redis
-// 	childMap, err := s.client.HGetAll(ctx, CategoryChildrenKey).Result()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to get category children: %w", err)
-// 	}
-// 	fmt.Println("len childmap", len(childMap))
-// 	// Parse dữ liệu thành map các danh mục
-// 	categories := make(map[string]*modelServices.Categorys)
-// 	for _, jsonStr := range dataMap {
-// 		var cat modelServices.Categorys
-// 		if err := json.Unmarshal([]byte(jsonStr), &cat); err != nil {
-// 			return nil, fmt.Errorf("failed to unmarshal category: %w", err)
-// 		}
-// 		categories[cat.CategoryID] = &cat
-// 	}
-
-// 	// Xây dựng cây bằng cách gắn các con vào cha
-// 	for parentID, childrenJson := range childMap {
-// 		var childrenIDs []string
-// 		if err := json.Unmarshal([]byte(childrenJson), &childrenIDs); err != nil {
-// 			return nil, fmt.Errorf("failed to unmarshal children for parent %s: %w", parentID, err)
-// 		}
-
-// 		if parent, exists := categories[parentID]; exists {
-// 			var childCategories []modelServices.Categorys
-// 			for _, childID := range childrenIDs {
-// 				if child, exists := categories[childID]; exists {
-// 					childCategories = append(childCategories, *child)
-// 				}
-// 			}
-// 			parent.Childs = modelServices.Narg[[]modelServices.Categorys]{Data: childCategories, Valid: true}
-// 		}
-// 	}
-
-// 	// Nếu có rootID, chỉ lấy danh mục đó và các con của nó
-// 	if rootID != "" {
-// 		if rootCat, exists := categories[rootID]; exists {
-// 			return []modelServices.Categorys{*rootCat}, nil
-// 		}
-// 		return nil, fmt.Errorf("category with ID %s not found", rootID)
-// 	}
-
-// 	// Nếu không có rootID, lấy toàn bộ danh mục gốc (không có parent hoặc parent không tồn tại)
-// 	var result []modelServices.Categorys
-// 	for _, cat := range categories {
-// 		if !cat.Parent.Valid || categories[cat.Parent.Data] == nil {
-// 			result = append(result, *cat)
-// 		}
-// 	}
-
-// 	return result, nil
-// }
-
 func (s *RedisDB) GetCategoryTree(ctx context.Context, rootID string) ([]modelServices.Categorys, error) {
 	// Lấy toàn bộ dữ liệu danh mục từ Redis
 	dataMap, err := s.client.HGetAll(ctx, CategoryDataKey).Result()
@@ -330,4 +328,53 @@ func (s *RedisDB) GetCategoryTree(ctx context.Context, rootID string) ([]modelSe
 	}
 
 	return result, nil
+}
+
+func (s *RedisDB) DeleteOrderOnline(ctx context.Context, orderID string) error {
+	// Giả sử hằng OrderOnline có giá trị "OrderOnline:"
+	// Pattern sẽ là "OrderOnline:*_<orderID>"
+	pattern := fmt.Sprintf("%s*_%s", OrderOnline, orderID)
+
+	// Lấy các key phù hợp. Nếu dữ liệu của bạn không quá lớn, có thể dùng KEYS
+	keys, err := s.client.Keys(ctx, pattern).Result()
+	if err != nil {
+		return fmt.Errorf("lỗi quét key với pattern %s: %w", pattern, err)
+	}
+
+	if len(keys) == 0 {
+		// Không tìm thấy key nào, có thể trả về lỗi hoặc đơn giản là không làm gì
+		return fmt.Errorf("không tìm thấy key nào cho order id %s", orderID)
+	}
+
+	// Nếu chỉ muốn xóa key đầu tiên tìm thấy, có thể làm như sau:
+	// err = s.client.Del(ctx, keys[0]).Err()
+	// Nếu muốn xóa tất cả các key phù hợp, hãy truyền toàn bộ slice keys vào:
+	err = s.client.Del(ctx, keys...).Err()
+	if err != nil {
+		return fmt.Errorf("lỗi xóa key(s): %w", err)
+	}
+
+	return nil
+}
+
+// Bắt đầu lắng nghe sự kiện hết hạn key
+func (h *RedisDB) StartExpirationListenerOrderOnline(cb func(ctx context.Context, orderID string)) {
+	ctx := context.Background()
+	pubsub := h.client.Subscribe(context.Background(), "__keyevent@0__:expired")
+	// Chạy listener trong goroutine
+	go func() {
+		defer pubsub.Close()
+		channel := pubsub.Channel()
+		for msg := range channel {
+
+			expiredKey := msg.Payload
+			if strings.HasPrefix(expiredKey, OrderOnline) {
+
+				strings := strings.Split(expiredKey, "_")
+				if len(strings) > 0 {
+					cb(ctx, strings[1])
+				}
+			}
+		}
+	}()
 }

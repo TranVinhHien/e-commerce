@@ -3,8 +3,11 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"math"
 	db "new-project/db/sqlc"
 	services "new-project/services/entity"
+	"sync"
 )
 
 func (s *SQLStore) TXCreateOrdder(ctx context.Context, order *services.Orders, orderDetail []services.OrderDetail) (err error) {
@@ -68,4 +71,146 @@ func (s *SQLStore) UpdateOrder(ctx context.Context, order services.Orders) (err 
 		OrderStatus:       db.NullOrdersOrderStatus{OrdersOrderStatus: db.OrdersOrderStatus(order.OrderStatus), Valid: order.OrderStatus != ""},
 		OrderID:           order.OrderID,
 	})
+}
+func (s *SQLStore) GetOrderByID(ctx context.Context, orderID string) (i services.Orders, err error) {
+
+	item, err := s.Queries.GetOrder(ctx, orderID)
+	if err != nil {
+		return i, err
+	}
+	return item.Convert(), nil
+}
+func (s *SQLStore) GetOrdersByUserID(ctx context.Context, userID string, query services.QueryFilter) (items []services.Orders, totalPages, totalElements int, err error) {
+	table_text := "orders"
+	query.Conditions = append(query.Conditions, services.Condition{
+		Field:    "customer_id",
+		Operator: "=",
+		Value:    userID,
+	})
+	rows, totalElements, err := listData(ctx, s.connPool, table_text, query)
+	if err != nil {
+		return nil, -1, -1, fmt.Errorf("error listData: %s", err.Error())
+	}
+	var is []db.Orders
+	for rows.Next() {
+		var i db.Orders
+		if err := rows.Scan(
+			&i.OrderID,
+			&i.TotalAmount,
+			&i.CustomerAddressID,
+			&i.DiscountID,
+			&i.PaymentMethodID,
+			&i.PaymentStatus,
+			&i.OrderStatus,
+			&i.CreateDate,
+			&i.UpdateDate,
+			&i.CustomerID,
+		); err != nil {
+			return nil, -1, -1, fmt.Errorf("error rows.Scan: %s", err.Error())
+		}
+		is = append(is, i)
+	}
+	defer rows.Close()
+	items = make([]services.Orders, len(is))
+
+	pages := math.Max((float64(totalElements)-1)/float64(query.PageSize), 1)
+	totalPages = int(math.Ceil(pages))
+
+	// if len(is)==0 return
+	if len(is) == 0 {
+		return items, 0, 0, nil
+	}
+	// get detail and product:
+	orderID := make([]string, 0, len(is))
+	AddressID := make([]string, 0, len(is))
+	addressSet := make(map[string]struct{})
+	for _, o := range is {
+		orderID = append(orderID, o.OrderID)
+		// Kiểm tra nếu o.CustomerAddressID chưa có trong addressSet
+		if _, exists := addressSet[o.CustomerAddressID]; !exists {
+			AddressID = append(AddressID, o.CustomerAddressID)
+			addressSet[o.CustomerAddressID] = struct{}{}
+		}
+	}
+	fmt.Println("is", is, "AddressID", AddressID)
+
+	addressUser, err := s.GetCustomerAddresss(ctx, AddressID)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
+	}
+
+	addressMap := make(map[string]services.CustomerAddress, len(addressUser))
+	for _, addr := range addressUser {
+		addressMap[addr.IDAddress] = addr
+	}
+
+	orderDetails, err := s.GetOrderDetailByOrderIDs(ctx, orderID)
+	if err != nil {
+		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
+	}
+	productSKUIds := make([]string, 0, len(orderDetails))
+	for _, o := range orderDetails {
+		productSKUIds = append(productSKUIds, o.ProductSkuID)
+	}
+	producutSKUs, err := s.GetProductsBySKUs(ctx, productSKUIds)
+	if err != nil {
+		fmt.Println("Error GetOrderDetailByorderIDs:", err)
+		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
+	}
+	// tạo map truy vấn cho nhanh
+	productSkuMap := make(map[string]services.ProductSkusDetail, len(producutSKUs))
+	for _, sku := range producutSKUs {
+		productSkuMap[sku.ProductSkuID] = sku
+	}
+
+	// go
+	var wg sync.WaitGroup
+	for i, order := range is {
+		wg.Add(1)
+		go func(idx int, ord db.Orders) {
+			// func(idx int, ord db.Orders) {
+			defer wg.Done()
+			items[idx] = processOrder(ord, orderDetails, productSkuMap, addressMap)
+		}(i, order)
+	}
+
+	wg.Wait()
+
+	return
+
+}
+func processOrder(order db.Orders, orderDetails []services.OrderDetail, productSkuMap map[string]services.ProductSkusDetail, addressMAP map[string]services.CustomerAddress) (OrderService services.Orders) {
+
+	filteredOrderDetails := make([]services.OrderDetail, 0)
+	for _, detail := range orderDetails {
+		if detail.OrderID == order.OrderID {
+			if sku, ok := productSkuMap[detail.ProductSkuID]; ok {
+				detail.ProductSKU = services.Narg[services.ProductSkusDetail]{
+					Valid: ok,
+					Data:  sku,
+				}
+			}
+			filteredOrderDetails = append(filteredOrderDetails, detail)
+		}
+	}
+	OrderService = order.Convert()
+	if addr, ok := addressMAP[OrderService.CustomerAddressID]; ok {
+		OrderService.Address = services.Narg[services.CustomerAddress]{
+			Valid: ok,
+			Data:  addr,
+		}
+	}
+	OrderService.OrderDetail = filteredOrderDetails
+	return
+}
+
+func (s *SQLStore) CheckUserOrder(ctx context.Context, userID, products_spu_id string) (check int64, err error) {
+	count, err := s.Queries.CheckUserOrder(ctx, db.CheckUserOrderParams{
+		CustomerID:    userID,
+		ProductsSpuID: products_spu_id,
+	})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

@@ -99,15 +99,16 @@ func (u *Employees) Convert() services.Employees {
 // Order
 func (u *Orders) Convert() services.Orders {
 	return services.Orders{
-		OrderID:         u.OrderID,
-		TotalAmount:     u.TotalAmount,
-		DiscountID:      services.Narg[string]{Data: u.DiscountID.String, Valid: u.DiscountID.Valid},
-		PaymentMethodID: u.PaymentMethodID,
-		PaymentStatus:   string(u.PaymentStatus.OrdersPaymentStatus),
-		OrderStatus:     string(u.OrderStatus.OrdersOrderStatus),
-		CreateDate:      u.CreateDate.Time,
-		UpdateDate:      services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
-		CustomerID:      u.CustomerID,
+		OrderID:           u.OrderID,
+		TotalAmount:       u.TotalAmount,
+		DiscountID:        services.Narg[string]{Data: u.DiscountID.String, Valid: u.DiscountID.Valid},
+		PaymentMethodID:   u.PaymentMethodID,
+		CustomerAddressID: u.CustomerAddressID,
+		PaymentStatus:     string(u.PaymentStatus.OrdersPaymentStatus),
+		OrderStatus:       string(u.OrderStatus.OrdersOrderStatus),
+		CreateDate:        u.CreateDate.Time,
+		UpdateDate:        services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
+		CustomerID:        u.CustomerID,
 	}
 }
 
@@ -119,6 +120,19 @@ func (u *OrderDetail) Convert() services.OrderDetail {
 		UnitPrice:     u.UnitPrice,
 		ProductSkuID:  u.ProductSkuID,
 		OrderID:       u.OrderID,
+	}
+}
+
+// rating
+func (u *Ratings) Convert() services.Ratings {
+	return services.Ratings{
+		RatingID:      u.RatingID,
+		Comment:       services.Narg[string]{Data: u.Comment.String, Valid: u.Comment.Valid},
+		Star:          u.Star,
+		CustomerID:    u.CustomerID,
+		CreateDate:    u.CreateDate.Time,
+		UpdateDate:    services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
+		ProductsSpuID: u.ProductsSpuID,
 	}
 }
 

@@ -5,3 +5,6 @@ const (
 	CategoryDataKey     = "category:tree:data_map"
 	CategoryChildrenKey = "category:tree:children_map"
 )
+const (
+	OrderOnline = "orderOnline:"
+)
