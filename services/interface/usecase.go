@@ -27,6 +27,7 @@ type UserUseCase interface {
 
 type Media interface {
 	RenderImage(ctx context.Context, filename string) string
+	RenderProductImages(ctx context.Context, filename string) string
 }
 type Categories interface {
 	GetCategoris(ctx context.Context, userName string) (map[string]interface{}, *assets_services.ServiceError)

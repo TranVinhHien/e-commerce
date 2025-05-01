@@ -45,7 +45,8 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 	}
 	media := group.Group("/media")
 	{
-		media.GET("/images/:id", api.renderImages())
+		media.GET("/avatar/:id", api.renderAvatars())
+		media.GET("/products", api.renderProductImages())
 	}
 	categories := group.Group("/categories")
 	{
