@@ -10,6 +10,11 @@ import (
 	"sync"
 )
 
+const (
+	payment_online  = "550e8400-e29b-41d4-a716-446655440050"
+	payment_offline = "550e8400-e29b-41d4-a716-446655440051"
+)
+
 func (s *SQLStore) TXCreateOrdder(ctx context.Context, order *services.Orders, orderDetail []services.OrderDetail) (err error) {
 	return s.execTS(ctx, func(tx *db.Queries) error {
 		orderDT := make([]db.CreateOrderDetailParams, 0, len(orderDetail))
@@ -132,8 +137,6 @@ func (s *SQLStore) GetOrdersByUserID(ctx context.Context, userID string, query s
 			addressSet[o.CustomerAddressID] = struct{}{}
 		}
 	}
-	fmt.Println("is", is, "AddressID", AddressID)
-
 	addressUser, err := s.GetCustomerAddresss(ctx, AddressID)
 	if err != nil {
 		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
@@ -153,6 +156,10 @@ func (s *SQLStore) GetOrdersByUserID(ctx context.Context, userID string, query s
 		productSKUIds = append(productSKUIds, o.ProductSkuID)
 	}
 	producutSKUs, err := s.GetProductsBySKUs(ctx, productSKUIds)
+	if err != nil {
+		fmt.Println("Error GetOrderDetailByorderIDs:", err)
+		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
+	}
 	if err != nil {
 		fmt.Println("Error GetOrderDetailByorderIDs:", err)
 		return nil, 0, 0, fmt.Errorf("error GetOrderDetailByorderIDs:%s", err.Error())
@@ -201,6 +208,21 @@ func processOrder(order db.Orders, orderDetails []services.OrderDetail, productS
 		}
 	}
 	OrderService.OrderDetail = filteredOrderDetails
+	paymentName := ""
+	if order.PaymentMethodID == payment_online {
+		paymentName = "Thanh Toán Onlne"
+	}
+	if order.PaymentMethodID == payment_offline {
+		paymentName = "Thanh Toán Onlne"
+	}
+	// tạm thời cái payment thì gán cứng cho nhanh
+	OrderService.PaymentMethod = services.Narg[services.PaymentMethods]{
+		Valid: true,
+		Data: services.PaymentMethods{
+			PaymentMethodID: order.PaymentMethodID,
+			Name:            paymentName,
+		},
+	}
 	return
 }
 

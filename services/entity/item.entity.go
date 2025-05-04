@@ -125,6 +125,7 @@ type Orders struct {
 	CustomerID        string                `json:"customer_id"`
 	OrderDetail       []OrderDetail         `json:"order_detail"`
 	Address           Narg[CustomerAddress] `json:"customer_address"`
+	PaymentMethod     Narg[PaymentMethods]  `json:"payment_method"`
 }
 
 type PaymentMethods struct {
