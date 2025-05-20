@@ -50,3 +50,8 @@ type RaTings interface {
 	ListRating(ctx context.Context, products_spu_id string, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
 	CreateRating(ctx context.Context, userID string, rating services.Ratings) *assets_services.ServiceError
 }
+
+type Products interface {
+	GetAllProductSimple(ctx context.Context, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
+	GetDetailProduct(ctx context.Context, productSpuID string) (map[string]interface{}, *assets_services.ServiceError)
+}

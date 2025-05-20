@@ -33,8 +33,8 @@ createtb:
 droptb:
 	migrate -path db/migration/ -database "mysql://root:12345@tcp(localhost:3306)/e-commerce" -verbose down
 mountimg:
-	sudo mount -t cifs //192.168.1.142/images_attr /home/master/project/e-commerce/imgs/products/images_attr   -o username=admin,password=Hienlazada#1,vers=3.0
-	sudo mount -t cifs //192.168.1.142/images_customer  /home/master/project/e-commerce/imgs/avatar   -o username=admin,password=Hienlazada#1,vers=3.0
-	sudo mount -t cifs //192.168.1.142/images  /home/master/project/e-commerce/imgs/products/images   -o username=admin,password=Hienlazada#1,vers=3.0 
+	sudo mount -t cifs //192.168.1.4/images_attr /home/master/project/e-commerce/imgs/products/images_attr   -o username=admin,password=Hienlazada#1,vers=3.0
+	sudo mount -t cifs //192.168.1.4/images_customer  /home/master/project/e-commerce/imgs/avatar   -o username=admin,password=Hienlazada#1,vers=3.0
+	sudo mount -t cifs //192.168.1.4/images  /home/master/project/e-commerce/imgs/products/images   -o username=admin,password=Hienlazada#1,vers=3.0 
 
 .PHONY: run

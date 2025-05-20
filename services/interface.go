@@ -15,6 +15,7 @@ type ServicesRepository interface {
 	iservices.PaymentRepository
 	iservices.OrderRepository
 	iservices.RatingRepository
+	iservices.ProductsRepository
 }
 type ServiceUseCase interface {
 	iservices.UserUseCase
@@ -24,6 +25,7 @@ type ServiceUseCase interface {
 	iservices.Order
 	iservices.Payments
 	iservices.RaTings
+	iservices.Products
 }
 
 type ServicesRedis interface {

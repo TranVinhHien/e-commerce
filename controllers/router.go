@@ -79,4 +79,9 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 			rating_auth.POST("/create", api.createRating())
 		}
 	}
+	product := group.Group("/product")
+	{
+		product.GET("/getall", api.getAllProductSimple())
+		product.GET("/getdetail/:id", api.getDetailProduct())
+	}
 }

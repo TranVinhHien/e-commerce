@@ -53,3 +53,7 @@ type RatingRepository interface {
 	GetRatings(ctx context.Context, query services.QueryFilter) (items []services.Ratings, totalPages, totalElements int, err error)
 	CreateRating(ctx context.Context, rating services.Ratings) (err error)
 }
+type ProductsRepository interface {
+	GetAllProductSimple(ctx context.Context, query services.QueryFilter) (items []services.ProductSimple, totalPages, totalElements int, err error)
+	GetProductDetail(ctx context.Context, productSpuID string) (product_detail services.ProductDetail, err error)
+}

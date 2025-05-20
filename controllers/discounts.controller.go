@@ -34,11 +34,7 @@ func (api *apiController) listDiscount() func(ctx *gin.Context) {
 		} else {
 			order = nil
 		}
-		addrs, err := api.service.ListDiscount(ctx, services.QueryFilter{
-			Page:     pageInt,
-			PageSize: pageSizeInt,
-			OrderBy:  order,
-		})
+		addrs, err := api.service.ListDiscount(ctx, services.NewQueryFilter(pageInt, pageSizeInt, nil, order))
 		if err != nil {
 			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
 			return

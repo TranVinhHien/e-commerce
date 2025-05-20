@@ -137,7 +137,6 @@ CREATE TABLE product_sku_attrs (
   products_spu_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (products_spu_id) REFERENCES products_spu(products_spu_id)
 );
-
 -- 10. Bảng payment_method 
 CREATE TABLE payment_methods (
   payment_method_id VARCHAR(36) PRIMARY KEY,

@@ -27,6 +27,19 @@ type QueryFilter struct {
 	PageSize   int      // Số lượng kết quả mỗi trang
 }
 
+func NewQueryFilter(page int, pageSize int, conditions []Condition, orderBy *OrderBy) QueryFilter {
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	return QueryFilter{
+		Page:       page,
+		PageSize:   pageSize,
+		Conditions: conditions,
+		OrderBy:    orderBy,
+	}
+}
+
 type Users struct {
 }
 type Accounts struct {
@@ -244,4 +257,25 @@ type CreateOrderParams struct {
 	Discount_Id   string           ` json:"discount_id"`
 	Address_id    string           `json:"address_id"`
 	Payment_id    string           `json:"payment_id"`
+}
+
+type ProductSimple struct {
+	ProductsSpuID    string `json:"products_spu_id"`
+	Name             string `json:"name"`
+	ShortDescription string `json:"short_description"`
+	StockStatus      string `json:"stock_status"`
+	DeleteStatus     string `json:"delete_status"`
+	Image            string `json:"image"`
+	// Media            string  `json:"media"`
+	Key         string  `json:"key"`
+	CategoryID  string  `json:"category_id"`
+	Price       float64 `json:"price"`
+	Avg_star    float64 `json:"average_star"`
+	TotalRating int32   `json:"total_rating"`
+}
+type ProductDetail struct {
+	Spu     ProductsSpu       `json:"spu"`
+	Sku     []ProductSkus     `json:"sku"`
+	DesAttr []DescriptionAttr `json:"description_attrs"`
+	SkuAttr []ProductSkuAttrs `json:"sku_attrs"`
 }

@@ -3,10 +3,69 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"math"
 	db "new-project/db/sqlc"
 	services "new-project/services/entity"
+	"strings"
 )
+
+type RatingAvgAndCountSPU struct {
+	ProductsSpuID string  `json:"products_spu_id"`
+	Avg_star      float64 `json:"average_star"`
+	TotalRating   int32   `json:"total_rating"`
+}
+
+func (s *SQLStore) buildGetRatingsAVGAndCOUNT(ctx context.Context, productSpuIDs []string) ([]RatingAvgAndCountSPU, error) {
+
+	const getProductsBySKU = `
+	SELECT 
+    r.products_spu_id, 
+    COUNT(r.rating_id) AS total_rating, 
+    ROUND(AVG(r.star), 1)  AS average_star
+FROM 
+    ratings r
+WHERE 
+    r.products_spu_id IN (%s)  -- Thay thế với danh sách ID của sản phẩm
+GROUP BY 
+    r.products_spu_id;
+	`
+
+	placeholders := make([]string, len(productSpuIDs))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+	query := fmt.Sprintf(getProductsBySKU, strings.Join(placeholders, ","))
+
+	// Chuyển đổi danh sách thành các tham số cho câu lệnh SQL
+	args := make([]interface{}, len(productSpuIDs))
+	for i, id := range productSpuIDs {
+		args[i] = id
+	}
+
+	rows, err := s.connPool.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []RatingAvgAndCountSPU
+	for rows.Next() {
+		var i RatingAvgAndCountSPU
+		if err := rows.Scan(
+			&i.ProductsSpuID,
+			&i.TotalRating,
+			&i.Avg_star,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 func (s *SQLStore) GetRatings(ctx context.Context, query services.QueryFilter) (items []services.Ratings, totalPages, totalElements int, err error) {
 	table_text := "ratings"

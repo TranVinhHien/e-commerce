@@ -85,12 +85,7 @@ func (api *apiController) getMyOrders() func(ctx *gin.Context) {
 		} else {
 			order = nil
 		}
-		orders, err := api.service.ListOrderByUserID(ctx, authPayload.Sub, services.QueryFilter{
-			Conditions: condition,
-			Page:       pageInt,
-			PageSize:   pageSizeInt,
-			OrderBy:    order,
-		})
+		orders, err := api.service.ListOrderByUserID(ctx, authPayload.Sub, services.NewQueryFilter(pageInt, pageSizeInt, condition, order))
 		if err != nil {
 			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
 			return

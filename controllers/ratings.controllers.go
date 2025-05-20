@@ -40,11 +40,7 @@ func (api *apiController) listRating() func(ctx *gin.Context) {
 		} else {
 			order = nil
 		}
-		ratings, err := api.service.ListRating(ctx, products_spu_id, services.QueryFilter{
-			Page:     pageInt,
-			PageSize: pageSizeInt,
-			OrderBy:  order,
-		})
+		ratings, err := api.service.ListRating(ctx, products_spu_id, services.NewQueryFilter(pageInt, pageSizeInt, nil, order))
 		if err != nil {
 			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
 			return
