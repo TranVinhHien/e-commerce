@@ -84,4 +84,6 @@ func (api apiController) SetUpRoute(group *gin.RouterGroup) {
 		product.GET("/getall", api.getAllProductSimple())
 		product.GET("/getdetail/:id", api.getDetailProduct())
 	}
+	// group.GET("/.well-known/assetlinks.json", api.renderAndroid())
+
 }

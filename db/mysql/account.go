@@ -306,3 +306,51 @@ func (s *SQLStore) GetCustomerAddresss(ctx context.Context, address_id []string)
 	}
 	return
 }
+
+func (s *SQLStore) buildGetCustomersByID(ctx context.Context, ids []string) ([]db.Customers, error) {
+
+	const querySQL = `-- name: GetCustomersByID :many
+	SELECT customer_id, name,email, image, dob, gender,account_id,create_date,update_date FROM customers
+	WHERE customer_id IN (%s)
+	`
+
+	placeholders := make([]string, len(ids))
+	for i := range placeholders {
+		placeholders[i] = "?"
+	}
+	query := fmt.Sprintf(querySQL, strings.Join(placeholders, ","))
+	// Chuyển đổi danh sách thành các tham số cho câu lệnh SQL
+	args := make([]interface{}, len(ids))
+	for i, id := range ids {
+		args[i] = id
+	}
+
+	rows, err := s.connPool.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []db.Customers
+	for rows.Next() {
+		var i db.Customers
+		if err := rows.Scan(
+			&i.CustomerID,
+			&i.Name,
+			&i.Email,
+			&i.Image,
+			&i.Dob,
+			&i.Gender,
+			&i.AccountID,
+			&i.CreateDate,
+			&i.UpdateDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

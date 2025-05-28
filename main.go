@@ -66,6 +66,12 @@ func main() {
 		services.RemoveOrderOnline(ctx, orderID)
 	})
 	engine := gin.Default()
+
+	// engine.StaticFS("/.well-known", http.Dir("./assets/setup-mobile"))
+	engine.GET("/.well-known/assetlinks.json", func(c *gin.Context) {
+		c.Header("Content-Type", "application/json")
+		c.File("./assets/setup-mobile/assetlinks.json")
+	})
 	// config cors middleware
 	config := cors.Config{
 		AllowOrigins:     []string{env.ClientIP},                              // Chỉ cho phép localhost:3000

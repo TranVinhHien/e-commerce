@@ -9,12 +9,16 @@ import (
 	"reflect"
 )
 
+// HideFields ẩn các field được chỉ định từ đối tượng hoặc mảng/slice và trả về dưới dạng map với key được cung cấp
 func HideFields(obj interface{}, key string, fieldsToHide ...string) (map[string]interface{}, error) {
 	// Convert object to JSON
 	data, err := json.Marshal(obj)
 	if err != nil {
 		return nil, err
 	}
+
+	// Khởi tạo kết quả trả về
+	result := make(map[string]interface{})
 
 	// Xử lý trường hợp đầu vào là slice/array
 	if reflect.TypeOf(obj).Kind() == reflect.Slice || reflect.TypeOf(obj).Kind() == reflect.Array {
@@ -24,30 +28,35 @@ func HideFields(obj interface{}, key string, fieldsToHide ...string) (map[string
 		}
 
 		// Ẩn các field chỉ định trong từng phần tử
-		if fieldsToHide != nil {
-			for i := range slice {
-				for _, field := range fieldsToHide {
-					delete(slice[i], field)
-				}
+		for i := range slice {
+			for _, field := range fieldsToHide {
+				delete(slice[i], field)
 			}
 		}
 
-		// Trả về dạng map với key "data" chứa mảng
-		return map[string]interface{}{
-			key: slice,
-		}, nil
+		// Gán slice vào key trong result
+		result[key] = slice
+		return result, nil
 	}
 
-	// Xử lý trường hợp đầu vào là đối tượng đơn
-	var result map[string]interface{}
-	if err := json.Unmarshal(data, &result); err != nil {
+	// Xử lý trường hợp đầu vào là đối tượng đơn (struct hoặc map)
+	var singleObj map[string]interface{}
+	if err := json.Unmarshal(data, &singleObj); err != nil {
 		return nil, err
 	}
 
+	// Ẩn các field chỉ định
 	for _, field := range fieldsToHide {
-		delete(result, field)
+		delete(singleObj, field)
 	}
 
+	// Nếu key rỗng, trả về trực tiếp singleObj
+	if key == "" {
+		return singleObj, nil
+	}
+
+	// Gán singleObj vào key trong result
+	result[key] = singleObj
 	return result, nil
 }
 

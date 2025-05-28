@@ -75,6 +75,10 @@ func (s *SQLStore) GetRatings(ctx context.Context, query services.QueryFilter) (
 		return nil, -1, -1, err
 	}
 	var is []db.Ratings
+	user_ids := make([]string, len(is))
+
+	// get price
+
 	for rows.Next() {
 		var i db.Ratings
 		if err := rows.Scan(
@@ -88,15 +92,24 @@ func (s *SQLStore) GetRatings(ctx context.Context, query services.QueryFilter) (
 		); err != nil {
 			return nil, -1, -1, err
 		}
+		user_ids = append(user_ids, i.CustomerID)
 		is = append(is, i)
 	}
 	defer rows.Close()
 	items = make([]services.Ratings, len(is))
+	usersInfo := make(map[string]db.Customers)
 	// Duyệt và chuyển đổi
+	customerInfo, err := s.buildGetCustomersByID(ctx, user_ids)
+	for _, o := range customerInfo {
+		usersInfo[o.CustomerID] = o
+	}
 	for i, item := range is {
 		items[i] = item.Convert()
+		hihi := usersInfo[item.CustomerID]
+		items[i].UserInfo = services.Narg[services.Customers]{Data: hihi.Convert(), Valid: hihi.CustomerID != ""}
 	}
 
+	// get name user
 	pages := (float64(totalElements) - 1) / float64(query.PageSize)
 	totalPages = int(math.Ceil(pages))
 

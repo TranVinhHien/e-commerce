@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	assets_api "new-project/assets/api"
 	controllers_assets "new-project/controllers/assets"
@@ -32,13 +33,15 @@ func (api *apiController) getAllProductSimple() func(ctx *gin.Context) {
 			ctx.JSON(400, assets_api.ResponseError(400, errors.Error()))
 			return
 		}
+
 		order := &services.OrderBy{}
 		if order_by != "" {
+			order.Value = services.OrderDirection(order_option)
 			order.Field = order_by
-			order.Field = order_option
 		} else {
 			order = nil
 		}
+		fmt.Println("order", order)
 		orders, err := api.service.GetAllProductSimple(ctx, services.NewQueryFilter(pageInt, pageSizeInt, condition, order))
 		if err != nil {
 			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))

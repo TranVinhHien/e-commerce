@@ -21,7 +21,7 @@ func (s *service) ListRating(ctx context.Context, products_spu_id string, query 
 		return nil, assets_services.NewError(400, err)
 	}
 
-	result, err := assets_services.HideFields(discounts, "discounts")
+	result, err := assets_services.HideFields(discounts, "discounts", "account_id", "customer_id")
 	if err != nil {
 		fmt.Println("Error HideFields:", err)
 		return nil, assets_services.NewError(400, err)

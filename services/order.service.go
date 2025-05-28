@@ -52,6 +52,7 @@ func createMoMoPayload(env config_assets.ReadENV, payloadd services.CombinedData
 	rawSignature.WriteString(orderInfo)
 	rawSignature.WriteString("&partnerCode=")
 	rawSignature.WriteString(partnerCode)
+	// chuyển hướng về ứng dụng của mình
 	rawSignature.WriteString("&redirectUrl=")
 	rawSignature.WriteString(redirectUrl)
 	rawSignature.WriteString("&requestId=")
@@ -101,7 +102,6 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 	if vl, _ := s.redis.GetOrderOnline(ctx, user_id); vl != nil {
 		return nil, assets_services.NewError(400, fmt.Errorf("bạn còn order:  %s chưa được thanh toán", vl.OrderTX.OrderID))
 	}
-
 	// lay thong tin dia chi nguoi dung va kiem tra hop le
 	info, address, err := s.repository.CustomerAddresses(ctx, user_id, order.Address_id)
 	if err != nil {
@@ -154,7 +154,7 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 				ID:          sku.ProductSkuID,
 				Name:        sku.Name,
 				Description: sku.ShortDescription,
-				ImageURL:    sku.Image,
+				ImageURL:    s.env.PublicID + "/media/products?id=" + sku.Image,
 				Price:       int64(sku.Price),
 				Currency:    "VND",
 				Quantity:    quantity,
@@ -182,7 +182,7 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 		if dc.StartDate.After(time.Now()) {
 			return nil, assets_services.NewError(400, fmt.Errorf("discount: %s  yet start", dc.DiscountCode))
 		}
-
+		// fmt.Printf("dc.dc.minOrderValue: %f, dc.total_amount: %f", dc.MinOrderValue, total_amount)
 		if dc.MinOrderValue > total_amount {
 			return nil, assets_services.NewError(400, fmt.Errorf("discount: %s  unvalid total_amount order must more than %f", dc.DiscountCode, dc.MinOrderValue))
 		}
@@ -218,6 +218,8 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 		}
 		payload := createMoMoPayload(s.env, payloadParamsMoMo)
 		defer s.redis.AddOrderOnline(ctx, user_id, payloadParamsMoMo, s.env.OrderDuration)
+
+		// log đầy đủ thông tin của payload dễ nhìn
 		return callMoMoGetURL(s.env, payload)
 	}
 
@@ -289,7 +291,6 @@ func callMoMoGetURL(env config_assets.ReadENV, payload services.Payload_MOMO) (m
 func (s *service) GetURLOrderMoMOAgain(ctx context.Context, user_id string) (map[string]interface{}, *assets_services.ServiceError) {
 	// check neu co order thi khong cho nguoi dung thanh toan
 	payloadParamsMoMo, err := s.redis.GetOrderOnline(ctx, user_id)
-	// return nil, assets_services.NewError(400, fmt.Errorf("bạn còn order:  %s chưa được thanh toán", vl.OrderID))
 	if err != nil {
 		return nil, assets_services.NewError(400, fmt.Errorf("error redis.GetOrderOnline:  %s ", err.Error()))
 	}

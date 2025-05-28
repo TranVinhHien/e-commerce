@@ -28,6 +28,7 @@ type ReadENV struct {
 	AccessKeyMoMo string `mapstructure:"ACCESS_KEY_MOMO"`
 	SecretKeyMoMo string `mapstructure:"SECRET_KEY_MOMO"`
 	RedirectURL   string `mapstructure:"REDIRECTURL"`
+	PublicID      string `mapstructure:"PUBLIC_ID"`
 	IpnURL        string `mapstructure:"IPNURL"`
 	EndPointMoMo  string `mapstructure:"ENDPOINT_MOMO"`
 }

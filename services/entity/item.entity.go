@@ -222,6 +222,7 @@ type Ratings struct {
 	UpdateDate    Narg[time.Time] `json:"update_date"`
 	CustomerID    string          `json:"custonmer_id"`
 	ProductsSpuID string          `json:"products_spu_id"`
+	UserInfo      Narg[Customers] `json:"user_info"`
 }
 
 type RoleAccount struct {
