@@ -360,6 +360,7 @@ func (s *RedisDB) DeleteOrderOnline(ctx context.Context, orderID string) error {
 // Bắt đầu lắng nghe sự kiện hết hạn key
 func (h *RedisDB) StartExpirationListenerOrderOnline(cb func(ctx context.Context, orderID string)) {
 	ctx := context.Background()
+	fmt.Println("Starting expiration listener for OrderOnline keys...")
 	pubsub := h.client.Subscribe(context.Background(), "__keyevent@0__:expired")
 	// Chạy listener trong goroutine
 	go func() {
@@ -368,11 +369,14 @@ func (h *RedisDB) StartExpirationListenerOrderOnline(cb func(ctx context.Context
 		for msg := range channel {
 
 			expiredKey := msg.Payload
+			fmt.Println("Key expired:", expiredKey)
 			if strings.HasPrefix(expiredKey, OrderOnline) {
-
+				fmt.Println("OrderOnline:", OrderOnline)
 				strings := strings.Split(expiredKey, "_")
 				if len(strings) > 0 {
+					fmt.Println("Starting expiration listener for OrderOnline keys...", strings[1])
 					cb(ctx, strings[1])
+
 				}
 			}
 		}
