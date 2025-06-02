@@ -26,6 +26,7 @@ type ServiceUseCase interface {
 	iservices.Payments
 	iservices.RaTings
 	iservices.Products
+	iservices.JobsService
 }
 
 type ServicesRedis interface {

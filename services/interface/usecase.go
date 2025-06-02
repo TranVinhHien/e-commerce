@@ -55,3 +55,6 @@ type Products interface {
 	GetAllProductSimple(ctx context.Context, query services.QueryFilter) (map[string]interface{}, *assets_services.ServiceError)
 	GetDetailProduct(ctx context.Context, productSpuID string) (map[string]interface{}, *assets_services.ServiceError)
 }
+type JobsService interface {
+	NotiNewDiscount(ctx context.Context) error
+}
