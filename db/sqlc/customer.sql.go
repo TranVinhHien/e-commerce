@@ -52,7 +52,7 @@ func (q *Queries) DeleteCustomer(ctx context.Context, customerID string) error {
 }
 
 const getCustomer = `-- name: GetCustomer :one
-SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date FROM customers
+SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date, device_registration_token FROM customers
 WHERE customer_id = ? LIMIT 1
 `
 
@@ -69,12 +69,13 @@ func (q *Queries) GetCustomer(ctx context.Context, customerID string) (Customers
 		&i.AccountID,
 		&i.CreateDate,
 		&i.UpdateDate,
+		&i.DeviceRegistrationToken,
 	)
 	return i, err
 }
 
 const getCustomerByAccountID = `-- name: GetCustomerByAccountID :one
-SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date FROM customers
+SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date, device_registration_token FROM customers
 WHERE account_id = ? LIMIT 1
 `
 
@@ -91,12 +92,13 @@ func (q *Queries) GetCustomerByAccountID(ctx context.Context, accountID string) 
 		&i.AccountID,
 		&i.CreateDate,
 		&i.UpdateDate,
+		&i.DeviceRegistrationToken,
 	)
 	return i, err
 }
 
 const listCustomers = `-- name: ListCustomers :many
-SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date FROM customers
+SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date, device_registration_token FROM customers
 `
 
 func (q *Queries) ListCustomers(ctx context.Context) ([]Customers, error) {
@@ -118,6 +120,7 @@ func (q *Queries) ListCustomers(ctx context.Context) ([]Customers, error) {
 			&i.AccountID,
 			&i.CreateDate,
 			&i.UpdateDate,
+			&i.DeviceRegistrationToken,
 		); err != nil {
 			return nil, err
 		}
@@ -133,7 +136,7 @@ func (q *Queries) ListCustomers(ctx context.Context) ([]Customers, error) {
 }
 
 const listCustomersPaged = `-- name: ListCustomersPaged :many
-SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date FROM customers
+SELECT customer_id, name, email, image, dob, gender, account_id, create_date, update_date, device_registration_token FROM customers
 ORDER BY customer_id
 LIMIT ? OFFSET ?
 `
@@ -162,6 +165,7 @@ func (q *Queries) ListCustomersPaged(ctx context.Context, arg ListCustomersPaged
 			&i.AccountID,
 			&i.CreateDate,
 			&i.UpdateDate,
+			&i.DeviceRegistrationToken,
 		); err != nil {
 			return nil, err
 		}
@@ -184,18 +188,20 @@ SET name = COALESCE(?, name),
     dob = COALESCE(?, dob),
     gender = COALESCE(?, gender),
     account_id = COALESCE(?, account_id),
+    device_registration_token = COALESCE(?, device_registration_token),
     update_date = NOW()
 WHERE customer_id = ?
 `
 
 type UpdateCustomerParams struct {
-	Name       sql.NullString      `json:"name"`
-	Email      sql.NullString      `json:"email"`
-	Image      sql.NullString      `json:"image"`
-	Dob        sql.NullTime        `json:"dob"`
-	Gender     NullCustomersGender `json:"gender"`
-	AccountID  sql.NullString      `json:"account_id"`
-	CustomerID string              `json:"customer_id"`
+	Name                    sql.NullString      `json:"name"`
+	Email                   sql.NullString      `json:"email"`
+	Image                   sql.NullString      `json:"image"`
+	Dob                     sql.NullTime        `json:"dob"`
+	Gender                  NullCustomersGender `json:"gender"`
+	AccountID               sql.NullString      `json:"account_id"`
+	DeviceRegistrationToken sql.NullString      `json:"device_registration_token"`
+	CustomerID              string              `json:"customer_id"`
 }
 
 func (q *Queries) UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) error {
@@ -206,6 +212,7 @@ func (q *Queries) UpdateCustomer(ctx context.Context, arg UpdateCustomerParams) 
 		arg.Dob,
 		arg.Gender,
 		arg.AccountID,
+		arg.DeviceRegistrationToken,
 		arg.CustomerID,
 	)
 	return err

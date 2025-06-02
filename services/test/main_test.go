@@ -1,8 +1,11 @@
 package services_test
 
 import (
+	"context"
 	"database/sql"
 	config_assets "new-project/assets/config"
+	assets_firebase "new-project/assets/fire-base"
+	assets_jobs "new-project/assets/jobs"
 	"new-project/assets/token"
 	db "new-project/db/mysql"
 	redis_db "new-project/db/redis"
@@ -29,8 +32,10 @@ func TestMain(m *testing.M) {
 	})
 	rerids := redis_db.NewRedisDB(rdb)
 	jwtMaker, _ := token.NewJWTMaker(env.JWTSecret)
-
-	testService = services.NewService(db, jwtMaker, env, rerids)
+	// firebaseApp, _ := firebase.N(context.Background(), nil, )
+	firebase, _ := assets_firebase.NewFirebase(context.Background(), "../../assets/firebase/credentials.json")
+	job, _ := assets_jobs.NewJobScheduler()
+	testService = services.NewService(db, jwtMaker, env, rerids, firebase, job)
 
 	os.Exit(m.Run())
 }

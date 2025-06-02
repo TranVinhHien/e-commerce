@@ -50,8 +50,9 @@ func (s *service) UpdatePassword(ctx context.Context, userName, oldPassword, new
 	return nil
 }
 
-func (s *service) Login(ctx context.Context, userName, password string) (accessToken, refreshToken string, info map[string]interface{}, error *assets_services.ServiceError) {
+func (s *service) Login(ctx context.Context, userName, password, token string) (accessToken, refreshToken string, info map[string]interface{}, error_s *assets_services.ServiceError) {
 	account, roleID, err := s.repository.Login(ctx, userName)
+	fmt.Println("token:", token)
 	if err != nil {
 		if err.Error() == "sql: no rows in result set" {
 			return "", "", nil, assets_services.NewError(404, fmt.Errorf("không tìm thấy tài khoảng"))
@@ -89,6 +90,16 @@ func (s *service) Login(ctx context.Context, userName, password string) (accessT
 			return "", "", nil, assets_services.NewError(400, err)
 		}
 	}
+
+	// update token mobile
+	if token != "" {
+		dulieucapnhat := services.Customers{
+			CustomerID:              userID,
+			DeviceRegistrationToken: services.Narg[string]{Data: token, Valid: true},
+		}
+		s.repository.UpdateCustomers(ctx, dulieucapnhat, func() error { return nil })
+	}
+
 	_, accessToken, err = s.jwt.CreateToken(userID, s.env.AccessTokenDuration)
 	if err != nil {
 		return "", "", nil, assets_services.NewError(400, fmt.Errorf("error create access token: %v", err))
@@ -180,7 +191,7 @@ func (s *service) NewAccessToken(ctx context.Context, refreshToken string) (*str
 func (s *service) UpdadateInfo(ctx context.Context, customer_id string, info *services.Customers) *assets_services.ServiceError {
 
 	info.CustomerID = customer_id
-	err := s.repository.UpdateCustomers(ctx, *info, nil)
+	err := s.repository.UpdateCustomers(ctx, *info, func() error { return nil })
 	if err != nil {
 		return assets_services.NewError(400, err)
 	}

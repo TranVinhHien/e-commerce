@@ -105,13 +105,13 @@ func (s *SQLStore) GetCustomer(ctx context.Context, customer_id string) (service
 
 func (s *SQLStore) UpdateCustomers(ctx context.Context, user services.Customers, fn func() error) error {
 	hihi := db.UpdateCustomerParams{
-		Name:   sql.NullString{String: user.Name, Valid: user.Name != ""},
-		Email:  sql.NullString{String: user.Name, Valid: user.Name != ""},
-		Image:  sql.NullString{String: user.Image.Data, Valid: user.Image.Valid},
-		Dob:    sql.NullTime{Time: user.Dob, Valid: user.Dob != time.Time{}},
-		Gender: db.NullCustomersGender{CustomersGender: db.CustomersGender(user.Gender), Valid: user.Gender != ""},
-
-		CustomerID: user.CustomerID,
+		Name:                    sql.NullString{String: user.Name, Valid: user.Name != ""},
+		Email:                   sql.NullString{String: user.Name, Valid: user.Name != ""},
+		Image:                   sql.NullString{String: user.Image.Data, Valid: user.Image.Valid},
+		Dob:                     sql.NullTime{Time: user.Dob, Valid: user.Dob != time.Time{}},
+		Gender:                  db.NullCustomersGender{CustomersGender: db.CustomersGender(user.Gender), Valid: user.Gender != ""},
+		DeviceRegistrationToken: sql.NullString{String: user.DeviceRegistrationToken.Data, Valid: user.DeviceRegistrationToken.Valid},
+		CustomerID:              user.CustomerID,
 	}
 
 	// wrap of tran
@@ -306,7 +306,12 @@ func (s *SQLStore) GetCustomerAddresss(ctx context.Context, address_id []string)
 	}
 	return
 }
-
+func (s *SQLStore) UpdateDeviceRegistrationToken(ctx context.Context, customer_id string, token string) (err error) {
+	return s.Queries.UpdateCustomer(ctx, db.UpdateCustomerParams{
+		CustomerID:              customer_id,
+		DeviceRegistrationToken: sql.NullString{String: token, Valid: token != ""},
+	})
+}
 func (s *SQLStore) buildGetCustomersByID(ctx context.Context, ids []string) ([]db.Customers, error) {
 
 	const querySQL = `-- name: GetCustomersByID :many

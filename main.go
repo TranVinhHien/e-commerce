@@ -5,6 +5,8 @@ import (
 	"context"
 	"database/sql"
 	config_assets "new-project/assets/config"
+	assets_firebase "new-project/assets/fire-base"
+	assets_jobs "new-project/assets/jobs"
 	"new-project/assets/token"
 	"new-project/controllers"
 	db "new-project/db/mysql"
@@ -56,15 +58,26 @@ func main() {
 	}
 	//setup redis Options
 	redisdb := redis_db.NewRedisDB(rdb)
-	// start jobs
-	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
 
-	services := services.NewService(db, jwtMaker, env, redisdb)
+	// setup firebase
+	FirebaseMessaging, err := assets_firebase.NewFirebase(context.Background(), "./assets/fire-base/ecom_firebase_connection_golang.json")
+	if err != nil {
+		log.Err(err).Msg("Error when created connect to firebase")
+		return
+	}
+	job, err := assets_jobs.NewJobScheduler()
+	if err != nil {
+		log.Err(err).Msg("Error when created job scheduler")
+		return
+	}
+	services := services.NewService(db, jwtMaker, env, redisdb, FirebaseMessaging, job)
 	controller := controllers.NewAPIController(services, jwtMaker)
 	// check remove order
 	go redisdb.StartExpirationListenerOrderOnline(func(ctx context.Context, orderID string) {
 		services.RemoveOrderOnline(ctx, orderID)
 	})
+	// start jobs
+	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
 	engine := gin.Default()
 
 	// engine.StaticFS("/.well-known", http.Dir("./assets/setup-mobile"))

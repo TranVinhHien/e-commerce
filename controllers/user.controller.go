@@ -60,7 +60,7 @@ func (api *apiController) login() func(ctx *gin.Context) {
 			ctx.AbortWithStatusJSON(http.StatusBadRequest, assets_api.ResponseError(http.StatusBadRequest, err.Error()))
 			return
 		}
-		accessToken, refershToken, user, err := api.service.Login(ctx, req.Username, req.Password)
+		accessToken, refershToken, user, err := api.service.Login(ctx, req.Username, req.Password, req.Token)
 		if err != nil {
 			ctx.JSON(err.Code, assets_api.ResponseError(err.Code, err.Error()))
 			return

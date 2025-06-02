@@ -380,15 +380,16 @@ type CustomerAddress struct {
 }
 
 type Customers struct {
-	CustomerID string              `json:"customer_id"`
-	Name       string              `json:"name"`
-	Email      string              `json:"email"`
-	Image      sql.NullString      `json:"image"`
-	Dob        sql.NullTime        `json:"dob"`
-	Gender     NullCustomersGender `json:"gender"`
-	AccountID  string              `json:"account_id"`
-	CreateDate sql.NullTime        `json:"create_date"`
-	UpdateDate sql.NullTime        `json:"update_date"`
+	CustomerID              string              `json:"customer_id"`
+	Name                    string              `json:"name"`
+	Email                   string              `json:"email"`
+	Image                   sql.NullString      `json:"image"`
+	Dob                     sql.NullTime        `json:"dob"`
+	Gender                  NullCustomersGender `json:"gender"`
+	AccountID               string              `json:"account_id"`
+	CreateDate              sql.NullTime        `json:"create_date"`
+	UpdateDate              sql.NullTime        `json:"update_date"`
+	DeviceRegistrationToken sql.NullString      `json:"device_registration_token"`
 }
 
 type DescriptionAttr struct {

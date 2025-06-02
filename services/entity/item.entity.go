@@ -70,15 +70,16 @@ type CustomerAddress struct {
 }
 
 type Customers struct {
-	CustomerID string          `json:"customer_id"`
-	Name       string          `json:"name"`
-	Email      string          `json:"email"`
-	Image      Narg[string]    `json:"image"`
-	Dob        time.Time       `json:"dob"`
-	Gender     string          `json:"gender"`
-	AccountID  string          `json:"account_id"`
-	CreateDate time.Time       `json:"create_date"`
-	UpdateDate Narg[time.Time] `json:"update_date"`
+	CustomerID              string          `json:"customer_id"`
+	Name                    string          `json:"name"`
+	Email                   string          `json:"email"`
+	Image                   Narg[string]    `json:"image"`
+	Dob                     time.Time       `json:"dob"`
+	Gender                  string          `json:"gender"`
+	DeviceRegistrationToken Narg[string]    `json:"device_registration_token"`
+	AccountID               string          `json:"account_id"`
+	CreateDate              time.Time       `json:"create_date"`
+	UpdateDate              Narg[time.Time] `json:"update_date"`
 }
 
 type DescriptionAttr struct {

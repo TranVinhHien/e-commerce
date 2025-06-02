@@ -29,6 +29,9 @@ gocron: // jobs scheduling package
 
 
 
-CONFIG SET notify-keyspace-events Ex //cài đặt pub/sub
+CONFIG SET notify-keyspace-events Ex //cài đặt pub/sub trên redis
+SET SESSION time_zone= '+07:00'; // tùy chỉnh thời gian cho đúng với hiện tai
 
 
+adb shell am start -a android.intent.action.VIEW -d "https://dabc-118-68-56-216.ngrok-free.app/order" com.example.fashionshop_app
+chạy ứng dụng dđể test chuyển hướng

@@ -17,6 +17,7 @@ SET name = COALESCE(sqlc.narg('name'), name),
     dob = COALESCE(sqlc.narg('dob'), dob),
     gender = COALESCE(sqlc.narg('gender'), gender),
     account_id = COALESCE(sqlc.narg('account_id'), account_id),
+    device_registration_token = COALESCE(sqlc.narg('device_registration_token'), device_registration_token),
     update_date = NOW()
 WHERE customer_id = ?;
 

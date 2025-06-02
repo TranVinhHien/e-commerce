@@ -11,7 +11,7 @@ type UserUseCase interface {
 	// without login
 	//GetInfo(ctx context.Context, customer_id string) (map[string]interface{}, *assets_services.ServiceError)
 	UpdatePassword(ctx context.Context, customer_id, oldPassword, newPassword string) *assets_services.ServiceError
-	Login(ctx context.Context, username, password string) (accessToken, refreshToken string, info map[string]interface{}, err *assets_services.ServiceError)
+	Login(ctx context.Context, username, password, token string) (accessToken, refreshToken string, info map[string]interface{}, err *assets_services.ServiceError)
 	Logout(ctx context.Context, refreshToken string) *assets_services.ServiceError
 	Register(ctx context.Context, customer_id, password string, userInfo *services.Customers) *assets_services.ServiceError
 	NewAccessToken(ctx context.Context, refreshToken string) (token *string, err *assets_services.ServiceError)

@@ -22,6 +22,8 @@ type UserRepository interface {
 	CreateCustomerAddresses(ctx context.Context, customer_id string, address *services.CustomerAddress) (err error)
 	UpdateCustomerAddresses(ctx context.Context, customer_id string, address *services.CustomerAddress) (err error)
 	DeleteCustomerAddresses(ctx context.Context, customer_id string, address_id string) (err error)
+
+	UpdateDeviceRegistrationToken(ctx context.Context, customer_id string, token string) (err error)
 }
 type CategoriesRepository interface {
 	ListCategories(ctx context.Context) ([]services.Categorys, error)

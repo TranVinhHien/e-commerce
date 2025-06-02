@@ -11,6 +11,7 @@ import (
 	"net/http"
 	config_assets "new-project/assets/config"
 	assets_services "new-project/services/assets"
+	services_assets_sendMessage "new-project/services/assets/sendMessage"
 	services "new-project/services/entity"
 	"strconv"
 	"time"
@@ -236,6 +237,8 @@ func (s *service) CallBackMoMo(ctx context.Context, tran services.TransactionMoM
 			PaymentStatus: assets_services.OrderTable_PaymentStatus_DaThanhToan,
 		})
 		// send email to
+		msg := services_assets_sendMessage.ThanhToanThanhCong()
+		s.firebase.SendToToken(ctx, "dcwt9J47TmqcVWgJa_qGzJ:APA91bGgCNiYTVcDrF7qEQtp-RKb7RD5CI-nWAlqxDA-nH68uqBWNnE0UrmwoJEWpcAOC-0OeDr-MGDcaa6clbuOJyacdW5V8zN34zYdPIqds_1icnwVX4E", msg)
 
 	}
 	// su ly api that bai
