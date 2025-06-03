@@ -2,29 +2,18 @@ package services
 
 import (
 	"context"
+	services_assets_sendMessage "new-project/services/assets/sendMessage"
 )
 
+const DISSCOUT = "discoumt_info"
+
 func (s *service) NotiNewDiscount(ctx context.Context) error {
-	// query.Conditions = []services.Condition{
-	// 	{Field: "amount", Operator: ">=", Value: 1},
-	// 	{Field: "end_date", Operator: ">", Value: time.Now()},
-	// }
-	// discounts, totalPages, totalElements, err := s.repository.ListDiscount(ctx, query)
 
-	// if err != nil {
-	// 	fmt.Println("Error ListDiscount:", err)
-	// 	return nil, assets_services.NewError(400, err)
-	// }
-
-	// result, err := assets_services.HideFields(discounts, "discounts")
-	// if err != nil {
-	// 	fmt.Println("Error HideFields:", err)
-	// 	return nil, assets_services.NewError(400, err)
-	// }
-	// result["currentPage"] = query.Page
-	// result["totalPages"] = totalPages
-	// result["totalElements"] = totalElements
-	// result["limit"] = query.PageSize
-	// return result, nil
+	listDiscounts, err := s.repository.GetDiscountForNoti(ctx)
+	if err != nil {
+		return nil
+	}
+	mes := services_assets_sendMessage.MaGiamGiaMoi(listDiscounts)
+	s.firebase.SendToTopic(ctx, DISSCOUT, mes)
 	return nil
 }

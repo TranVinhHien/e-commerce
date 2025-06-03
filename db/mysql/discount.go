@@ -52,3 +52,16 @@ func (s *SQLStore) ListDiscount(ctx context.Context, query services.QueryFilter)
 
 	return
 }
+
+func (s *SQLStore) GetDiscountForNoti(ctx context.Context) (items []services.Discounts, err error) {
+	is, err := s.Queries.GetDiscountForNoti(ctx)
+	if err != nil {
+		return nil, err
+	}
+	rows := make([]services.Discounts, len(is))
+	for _, item := range is {
+		rows = append(rows, item.Convert())
+	}
+
+	return rows, nil
+}

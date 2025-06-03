@@ -33,6 +33,7 @@ type CategoriesRepository interface {
 type ĐiscountRepository interface {
 	ListDiscount(ctx context.Context, query services.QueryFilter) (is []services.Discounts, totalPages, totalElements int, err error)
 	Discount(ctx context.Context, discount string) (i services.Discounts, err error)
+	GetDiscountForNoti(ctx context.Context) (is []services.Discounts, err error)
 }
 type PaymentRepository interface {
 	ListPayment(ctx context.Context) (is []services.PaymentMethods, err error)

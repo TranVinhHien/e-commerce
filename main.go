@@ -72,14 +72,8 @@ func main() {
 	}
 	services := services.NewService(db, jwtMaker, env, redisdb, FirebaseMessaging, job)
 	controller := controllers.NewAPIController(services, jwtMaker)
-	// check remove order
-	go redisdb.StartExpirationListenerOrderOnline(func(ctx context.Context, orderID string) {
-		services.RemoveOrderOnline(ctx, orderID)
-	})
-	// start jobs
-	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
-	engine := gin.Default()
 
+	engine := gin.Default()
 	// engine.StaticFS("/.well-known", http.Dir("./assets/setup-mobile"))
 	engine.GET("/.well-known/assetlinks.json", func(c *gin.Context) {
 		c.Header("Content-Type", "application/json")
@@ -99,6 +93,18 @@ func main() {
 	controller.SetUpRoute(v1)
 
 	log.Info().Msg("Starting server on port " + env.HTTPServerAddress)
+
+	// import job
+	// go services.NotiNewDiscount(context.Background())
+	// check remove order
+	go redisdb.StartExpirationListenerOrderOnline(func(ctx context.Context, orderID string) {
+		services.RemoveOrderOnline(context.Background(), orderID)
+	})
+	// start jobs
+	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
+	go job.NewJob(1, func() {
+		services.NotiNewDiscount(context.Background())
+	})
 
 	engine.Run(env.HTTPServerAddress)
 
@@ -153,4 +159,8 @@ func connectDBWithRetry(times int, dbConfig string) (*sql.DB, error) {
 		time.Sleep(time.Second * 2)
 	}
 	return nil, e
+}
+
+func goJobRedis(ctx context.Context, r services.ServicesRedis) {
+
 }

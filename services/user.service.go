@@ -202,6 +202,7 @@ func (s *service) UpdadateAvatar(ctx context.Context, customer_id string, file *
 
 	filePathS := fmt.Sprintf("%s%s%s", s.env.ImagePath, customer_id, file.Filename)
 	//save path to db
+	fmt.Println("file", filePathS)
 	errors := s.repository.UpdateCustomers(ctx, services.Customers{
 		CustomerID: customer_id,
 		Image:      services.Narg[string]{Data: filePathS, Valid: true},

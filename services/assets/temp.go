@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 	"reflect"
 )
 
@@ -67,7 +68,9 @@ func SaveUploadedFile(fileHeader *multipart.FileHeader, destination string) erro
 		return fmt.Errorf("mở file lỗi: %v", err)
 	}
 	defer src.Close()
-
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return fmt.Errorf("không thể tạo thư mục lưu ảnh: %v", err)
+	}
 	// Tạo file đích để lưu
 	dst, err := os.Create(destination)
 	if err != nil {

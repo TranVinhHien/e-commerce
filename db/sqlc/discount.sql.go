@@ -107,6 +107,44 @@ func (q *Queries) GetDiscountByCode(ctx context.Context, discountCode string) (D
 	return i, err
 }
 
+const getDiscountForNoti = `-- name: GetDiscountForNoti :many
+SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
+WHERE start_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 1 HOUR)
+`
+
+func (q *Queries) GetDiscountForNoti(ctx context.Context) ([]Discounts, error) {
+	rows, err := q.db.QueryContext(ctx, getDiscountForNoti)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discounts
+	for rows.Next() {
+		var i Discounts
+		if err := rows.Scan(
+			&i.DiscountID,
+			&i.DiscountCode,
+			&i.DiscountValue,
+			&i.StartDate,
+			&i.EndDate,
+			&i.MinOrderValue,
+			&i.Amount,
+			&i.CreateDate,
+			&i.UpdateDate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listActiveDiscounts = `-- name: ListActiveDiscounts :many
 SELECT discount_id, discount_code, discount_value, start_date, end_date, min_order_value, amount, create_date, update_date FROM discounts
 `
@@ -302,23 +340,26 @@ func (q *Queries) UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) 
 	return err
 }
 
-const updateDiscountAmountTru = `-- name: UpdateDiscountAmount :exec
-UPDATE discounts
-SET amount = amount - 1,
-    update_date = NOW()
-WHERE discount_id = ?
-`
-const updateDiscountAmountPlus = `-- name: UpdateDiscountAmount :exec
+const updateDiscountAmountCong = `-- name: UpdateDiscountAmountCong :exec
 UPDATE discounts
 SET amount = amount + 1,
     update_date = NOW()
 WHERE discount_id = ?
 `
-func (q *Queries) UpdateDiscountAmount(ctx context.Context, discountID string,isPlus bool) error {
-	query :=updateDiscountAmountTru
-	if (isPlus){
-		query=updateDiscountAmountPlus
-	}
-	_, err := q.db.ExecContext(ctx, query, discountID)
+
+func (q *Queries) UpdateDiscountAmountCong(ctx context.Context, discountID string) error {
+	_, err := q.db.ExecContext(ctx, updateDiscountAmountCong, discountID)
+	return err
+}
+
+const updateDiscountAmountTru = `-- name: UpdateDiscountAmountTru :exec
+UPDATE discounts
+SET amount = amount - 1,
+    update_date = NOW()
+WHERE discount_id = ?
+`
+
+func (q *Queries) UpdateDiscountAmountTru(ctx context.Context, discountID string) error {
+	_, err := q.db.ExecContext(ctx, updateDiscountAmountTru, discountID)
 	return err
 }

@@ -46,7 +46,7 @@ func (s *SQLStore) TXCreateOrdder(ctx context.Context, order *services.Orders, o
 		}
 		// check neu co discount thi tru so luong discount ra
 		if orderValue.DiscountID.Valid {
-			err = tx.UpdateDiscountAmount(ctx, orderValue.DiscountID.String, false)
+			err = tx.UpdateDiscountAmountTru(ctx, orderValue.DiscountID.String)
 			if err != nil {
 				return err
 			}
@@ -276,7 +276,7 @@ func (s *SQLStore) TXCancelOrder(ctx context.Context, orderID string) error {
 		//update amount Discound
 		// check neu co discount thi tru so luong discount ra
 		if order.DiscountID.Valid {
-			err = tx.UpdateDiscountAmount(ctx, order.DiscountID.String, true)
+			err = tx.UpdateDiscountAmountCong(ctx, order.DiscountID.String)
 			if err != nil {
 				return err
 			}

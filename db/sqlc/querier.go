@@ -56,6 +56,7 @@ type Querier interface {
 	GetDescriptionAttr(ctx context.Context, descriptionAttrID string) (DescriptionAttr, error)
 	GetDiscount(ctx context.Context, discountID string) (Discounts, error)
 	GetDiscountByCode(ctx context.Context, discountCode string) (Discounts, error)
+	GetDiscountForNoti(ctx context.Context) ([]Discounts, error)
 	GetEmployee(ctx context.Context, employeeID string) (Employees, error)
 	GetEmployeeByAccountID(ctx context.Context, accountID string) (Employees, error)
 	GetOrder(ctx context.Context, orderID string) (Orders, error)
@@ -113,7 +114,8 @@ type Querier interface {
 	UpdateCustomerAddress(ctx context.Context, arg UpdateCustomerAddressParams) error
 	UpdateDescriptionAttr(ctx context.Context, arg UpdateDescriptionAttrParams) error
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) error
-	UpdateDiscountAmount(ctx context.Context, discountID string,isPlus bool) error
+	UpdateDiscountAmountCong(ctx context.Context, discountID string) error
+	UpdateDiscountAmountTru(ctx context.Context, discountID string) error
 	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) error
 	UpdateOrder(ctx context.Context, arg UpdateOrderParams) error
 	UpdateOrderDetail(ctx context.Context, arg UpdateOrderDetailParams) error

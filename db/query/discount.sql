@@ -20,9 +20,15 @@ SET discount_code = COALESCE(sqlc.narg('discount_code'), discount_code),
     update_date = NOW()
 WHERE discount_id = ?;
 
--- name: UpdateDiscountAmount :exec
+-- name: UpdateDiscountAmountTru :exec
 UPDATE discounts
 SET amount = amount - 1,
+    update_date = NOW()
+WHERE discount_id = ?;
+
+-- name: UpdateDiscountAmountCong :exec
+UPDATE discounts
+SET amount = amount + 1,
     update_date = NOW()
 WHERE discount_id = ?;
 
@@ -50,3 +56,7 @@ SELECT * FROM discounts;
 
 -- name: CountDisscounts :one
 SELECT COUNT(*) as totalElements FROM discounts;
+
+-- name: GetDiscountForNoti :many
+SELECT * FROM discounts
+WHERE start_date BETWEEN NOW() AND DATE_ADD(NOW(), INTERVAL 1 HOUR);
