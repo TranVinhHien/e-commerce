@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	db "new-project/db/sqlc"
+	assets_services "new-project/services/assets"
 	services "new-project/services/entity"
 	"sync"
 )
@@ -39,13 +40,13 @@ func (s *SQLStore) TXCreateOrdder(ctx context.Context, order *services.Orders, o
 			})
 		}
 		// tru so luong sku
-		err := tx.UpdateProductStockSKU(ctx, orderDT)
+		err := tx.UpdateProductStockSKU(ctx, orderDT, false)
 		if err != nil {
 			return err
 		}
 		// check neu co discount thi tru so luong discount ra
 		if orderValue.DiscountID.Valid {
-			err = tx.UpdateDiscountAmount(ctx, orderValue.DiscountID.String)
+			err = tx.UpdateDiscountAmount(ctx, orderValue.DiscountID.String, false)
 			if err != nil {
 				return err
 			}
@@ -235,4 +236,51 @@ func (s *SQLStore) CheckUserOrder(ctx context.Context, userID, products_spu_id s
 		return 0, err
 	}
 	return count, nil
+}
+func (s *SQLStore) TXCancelOrder(ctx context.Context, orderID string) error {
+	return s.execTS(ctx, func(tx *db.Queries) error {
+		//get order
+		order, err := s.Queries.GetOrder(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("can't get order", err.Error())
+		}
+		//get detailorder
+		orderDetail, err := s.Queries.ListOrderDetailsByOrderID(ctx, orderID)
+		if err != nil {
+			return fmt.Errorf("can't get orderDetail", err.Error())
+		}
+		//update orderStatus
+		err = s.Queries.UpdateOrder(ctx,
+			db.UpdateOrderParams{
+				OrderID:     orderID,
+				OrderStatus: db.NullOrdersOrderStatus{OrdersOrderStatus: assets_services.OrderTable_OrderStatus_DaHuy, Valid: true}})
+		if err != nil {
+			return fmt.Errorf("can't update order status", err.Error())
+		}
+		//update amount SKU
+		orderDetailUpdate := make([]db.CreateOrderDetailParams, len(orderDetail))
+		for _, od := range orderDetail {
+			orderDetailUpdate = append(orderDetailUpdate, db.CreateOrderDetailParams{
+				OrderDetailID: od.OrderDetailID,
+				Quantity:      od.Quantity,
+				UnitPrice:     od.UnitPrice,
+				ProductSkuID:  od.ProductSkuID,
+				OrderID:       od.OrderID,
+			})
+		}
+		err = tx.UpdateProductStockSKU(ctx, orderDetailUpdate, true)
+		if err != nil {
+			return err
+		}
+
+		//update amount Discound
+		// check neu co discount thi tru so luong discount ra
+		if order.DiscountID.Valid {
+			err = tx.UpdateDiscountAmount(ctx, order.DiscountID.String, true)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }

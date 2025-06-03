@@ -43,7 +43,7 @@ type OrderRepository interface {
 	GetOrdersByUserID(ctx context.Context, userID string, query services.QueryFilter) (items []services.Orders, totalPages, totalElements int, err error)
 	GetOrderDetailByOrderIDs(ctx context.Context, orderIDs []string) (is []services.OrderDetail, err error)
 	GetOrderByID(ctx context.Context, orderID string) (i services.Orders, err error)
-
+	TXCancelOrder(ctx context.Context, orderID string) error
 	CheckUserOrder(ctx context.Context, userID, products_spu_id string) (count int64, err error)
 }
 

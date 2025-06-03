@@ -228,17 +228,30 @@ func (s *service) CreateOrder(ctx context.Context, user_id string, order *servic
 }
 func (s *service) CallBackMoMo(ctx context.Context, tran services.TransactionMoMO) {
 	// su ly api thanh cong
+	// sử lý thoong báo tại đây
 	if tran.ResultCode == 0 {
-		s.redis.DeleteOrderOnline(ctx, tran.RequestID)
+		orderID := tran.RequestID
+
+		s.redis.DeleteOrderOnline(ctx, orderID)
 		// s.repository
 		// caapj nhat cot
 		s.repository.UpdateOrder(ctx, services.Orders{
-			OrderID:       tran.RequestID,
+			OrderID:       orderID,
 			PaymentStatus: assets_services.OrderTable_PaymentStatus_DaThanhToan,
 		})
-		// send email to
-		msg := services_assets_sendMessage.ThanhToanThanhCong()
-		s.firebase.SendToToken(ctx, "dcwt9J47TmqcVWgJa_qGzJ:APA91bGgCNiYTVcDrF7qEQtp-RKb7RD5CI-nWAlqxDA-nH68uqBWNnE0UrmwoJEWpcAOC-0OeDr-MGDcaa6clbuOJyacdW5V8zN34zYdPIqds_1icnwVX4E", msg)
+		//get order
+		order, _ := s.repository.GetOrderByID(ctx, orderID)
+
+		// get infousser
+		userInfo, _ := s.repository.GetCustomer(ctx, order.CustomerID)
+
+		if userInfo.DeviceRegistrationToken.Data != "" {
+			// send message to
+			msg := services_assets_sendMessage.ThanhToanThanhCong(orderID, tran.Amount)
+			// get INFO
+			s.firebase.SendToToken(ctx, userInfo.DeviceRegistrationToken.Data, msg)
+
+		}
 
 	}
 	// su ly api that bai
@@ -303,10 +316,8 @@ func (s *service) GetURLOrderMoMOAgain(ctx context.Context, user_id string) (map
 
 func (s *service) RemoveOrderOnline(ctx context.Context, orderIDs string) {
 
-	s.repository.UpdateOrder(ctx, services.Orders{
-		OrderID:       orderIDs,
-		PaymentStatus: assets_services.OrderTable_PaymentStatus_ThanhToanHetHang,
-	})
+	s.repository.TXCancelOrder(ctx, orderIDs)
+
 }
 
 func (s *service) CancelOrder(ctx context.Context, user_id, orderID string) *assets_services.ServiceError {
@@ -324,9 +335,14 @@ func (s *service) CancelOrder(ctx context.Context, user_id, orderID string) *ass
 	if order.PaymentMethodID == s.env.PaymentOnline {
 		return assets_services.NewError(400, fmt.Errorf("bạn không thể thể hủy đơn hàng thanh toán online, vui lòng liên hệ nhân viên tư vấn đề sử lý"))
 	}
-	s.repository.UpdateOrder(ctx, services.Orders{
-		OrderID:     orderID,
-		OrderStatus: assets_services.OrderTable_OrderStatus_DaHuy,
-	})
+
+	err = s.repository.TXCancelOrder(ctx, orderID)
+	if err != nil {
+		return assets_services.NewError(400, fmt.Errorf("lỗi trong lúc hủy đơn ", err.Error()))
+
+	}
 	return nil
 }
+
+///v1/user/info/create_customeraddress
+///v1/user/info/create_customeraddress

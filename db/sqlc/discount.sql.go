@@ -302,14 +302,23 @@ func (q *Queries) UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) 
 	return err
 }
 
-const updateDiscountAmount = `-- name: UpdateDiscountAmount :exec
+const updateDiscountAmountTru = `-- name: UpdateDiscountAmount :exec
 UPDATE discounts
 SET amount = amount - 1,
     update_date = NOW()
 WHERE discount_id = ?
 `
-
-func (q *Queries) UpdateDiscountAmount(ctx context.Context, discountID string) error {
-	_, err := q.db.ExecContext(ctx, updateDiscountAmount, discountID)
+const updateDiscountAmountPlus = `-- name: UpdateDiscountAmount :exec
+UPDATE discounts
+SET amount = amount + 1,
+    update_date = NOW()
+WHERE discount_id = ?
+`
+func (q *Queries) UpdateDiscountAmount(ctx context.Context, discountID string,isPlus bool) error {
+	query :=updateDiscountAmountTru
+	if (isPlus){
+		query=updateDiscountAmountPlus
+	}
+	_, err := q.db.ExecContext(ctx, query, discountID)
 	return err
 }

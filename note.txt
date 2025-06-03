@@ -35,3 +35,7 @@ SET SESSION time_zone= '+07:00'; // tùy chỉnh thời gian cho đúng với hi
 
 adb shell am start -a android.intent.action.VIEW -d "https://dabc-118-68-56-216.ngrok-free.app/order" com.example.fashionshop_app
 chạy ứng dụng dđể test chuyển hướng
+
+
+keytool -list -v -keystore C:\Users\ADMIN\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android
+lấy SHA

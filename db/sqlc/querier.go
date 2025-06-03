@@ -113,7 +113,7 @@ type Querier interface {
 	UpdateCustomerAddress(ctx context.Context, arg UpdateCustomerAddressParams) error
 	UpdateDescriptionAttr(ctx context.Context, arg UpdateDescriptionAttrParams) error
 	UpdateDiscount(ctx context.Context, arg UpdateDiscountParams) error
-	UpdateDiscountAmount(ctx context.Context, discountID string) error
+	UpdateDiscountAmount(ctx context.Context, discountID string,isPlus bool) error
 	UpdateEmployee(ctx context.Context, arg UpdateEmployeeParams) error
 	UpdateOrder(ctx context.Context, arg UpdateOrderParams) error
 	UpdateOrderDetail(ctx context.Context, arg UpdateOrderDetailParams) error

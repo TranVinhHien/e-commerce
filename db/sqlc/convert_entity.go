@@ -30,15 +30,16 @@ func (u *Categorys) Convert() services.Categorys {
 // Customer
 func (u *Customers) Convert() services.Customers {
 	return services.Customers{
-		CustomerID: u.CustomerID,
-		Name:       u.Name,
-		Email:      u.Email,
-		Image:      services.Narg[string]{Data: u.Image.String, Valid: u.Image.Valid},
-		Dob:        u.Dob.Time,
-		Gender:     string(u.Gender.CustomersGender),
-		AccountID:  u.AccountID,
-		CreateDate: u.CreateDate.Time,
-		UpdateDate: services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
+		CustomerID:              u.CustomerID,
+		Name:                    u.Name,
+		Email:                   u.Email,
+		Image:                   services.Narg[string]{Data: u.Image.String, Valid: u.Image.Valid},
+		Dob:                     u.Dob.Time,
+		DeviceRegistrationToken: services.Narg[string]{Data: u.DeviceRegistrationToken.String, Valid: u.DeviceRegistrationToken.Valid},
+		Gender:                  string(u.Gender.CustomersGender),
+		AccountID:               u.AccountID,
+		CreateDate:              u.CreateDate.Time,
+		UpdateDate:              services.Narg[time.Time]{Data: u.UpdateDate.Time, Valid: u.UpdateDate.Valid},
 	}
 }
 

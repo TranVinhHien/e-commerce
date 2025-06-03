@@ -5,13 +5,17 @@ import (
 	"strings"
 )
 
-func buildUpdateProductStockSKU(data []CreateOrderDetailParams) (string, []interface{}) {
+func buildUpdateProductStockSKU(data []CreateOrderDetailParams, isPlus bool) (string, []interface{}) {
 	baseQuery := "UPDATE product_skus SET sku_stock = CASE product_sku_id  "
 	valueStrings := make([]string, 0, len(data))
 	valueArgs := make([]interface{}, 0, len(data)*5)
 
 	for _, vl := range data {
-		valueStrings = append(valueStrings, "WHEN ? THEN sku_stock - ?")
+		query := "WHEN ? THEN sku_stock - ?"
+		if isPlus {
+			query = "WHEN ? THEN sku_stock + ?"
+		}
+		valueStrings = append(valueStrings, query)
 		valueArgs = append(valueArgs, vl.ProductSkuID, vl.Quantity)
 	}
 	valueStrings_2 := make([]string, 0, len(data))
@@ -23,8 +27,8 @@ func buildUpdateProductStockSKU(data []CreateOrderDetailParams) (string, []inter
 	query := baseQuery + strings.Join(valueStrings, " ") + " END, update_date = NOW() WHERE product_sku_id IN (" + strings.Join(valueStrings_2, ",") + ");"
 	return query, valueArgs
 }
-func (s *Queries) UpdateProductStockSKU(ctx context.Context, orderDT []CreateOrderDetailParams) error {
-	query, data := buildUpdateProductStockSKU(orderDT)
+func (s *Queries) UpdateProductStockSKU(ctx context.Context, orderDT []CreateOrderDetailParams, isPlus bool) error {
+	query, data := buildUpdateProductStockSKU(orderDT, isPlus)
 	_, err := s.db.ExecContext(ctx, query, data...)
 	if err != nil {
 		return err
