@@ -23,7 +23,7 @@ func MaGiamGiaMoi(discount []services.Discounts) *messaging.Notification {
 	}
 	return &messaging.Notification{
 		Title: "Mã giảm giá",
-		Body:  fmt.Sprint("Có %d mã giảm giá sẽ được sử dụng trong 1 tiếng tới với giá trị giảm giá lớn nhất lên đến %f vnđ ", len(discount), max),
+		Body:  "Có " + fmt.Sprint(" ", len(discount)) + " mã giảm giá sẽ được sử dụng trong 1 tiếng tới với giá trị giảm giá lớn nhất lên đến " + fmt.Sprint(" ", max) + "vnđ",
 		// ImageURL: "https://f6e9-118-68-56-216.ngrok-free.app/v1/media/products?id=images/phu-kien-thoi-trang___phu-kien-nu___phu-kien-nu-khac/100477499_1.jpg",
 	}
 }

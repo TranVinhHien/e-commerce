@@ -200,12 +200,12 @@ func (s *service) UpdadateInfo(ctx context.Context, customer_id string, info *se
 func (s *service) UpdadateAvatar(ctx context.Context, customer_id string, file *multipart.FileHeader) (err *assets_services.ServiceError) {
 	// create fiile
 
-	filePathS := fmt.Sprintf("%s%s%s", s.env.ImagePath, customer_id, file.Filename)
+	filePathS := fmt.Sprintf("%s %s %s", s.env.ImagePath, customer_id, file.Filename)
 	//save path to db
 	fmt.Println("file", filePathS)
 	errors := s.repository.UpdateCustomers(ctx, services.Customers{
 		CustomerID: customer_id,
-		Image:      services.Narg[string]{Data: filePathS, Valid: true},
+		Image:      services.Narg[string]{Data: customer_id + file.Filename, Valid: true},
 	}, func() error {
 		err := assets_services.SaveUploadedFile(file, filePathS)
 		return err

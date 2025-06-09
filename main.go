@@ -102,9 +102,9 @@ func main() {
 	})
 	// start jobs
 	go redisdb.RemoveTokenExp(redis_db.BLACK_LIST)
-	go job.NewJob(1, func() {
-		services.NotiNewDiscount(context.Background())
-	})
+	// go job.NewJob(1, func() {
+	// 	services.NotiNewDiscount(context.Background())
+	// })
 
 	engine.Run(env.HTTPServerAddress)
 

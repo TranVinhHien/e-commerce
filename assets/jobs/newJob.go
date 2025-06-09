@@ -31,9 +31,11 @@ func (j *JobScheduler) NewJob(hours int, job func()) error {
 	newJob, err := j.scheduler.NewJob(
 		gocron.DurationJob(
 			time.Duration(hours)*time.Hour,
+			// time.Duration(30)*time.Second,
 		),
 		gocron.NewTask(
 			func() {
+				fmt.Println("run task")
 				go job()
 			},
 		),
