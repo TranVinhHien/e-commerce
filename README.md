@@ -6,7 +6,7 @@ The application provides a seamless online shopping experience with product brow
 ---
 
 ## 📹 Demo
- [Watch the Demo Video](https://youtu.be/EXCrOGR7VL4](https://drive.google.com/file/d/1-6y-Cfs3L3tQdjZzr435HjA_9I9fK0rR/view?usp=drive_link))
+ [Watch the Demo Video](https://drive.google.com/file/d/1-6y-Cfs3L3tQdjZzr435HjA_9I9fK0rR/view?usp=drive_link))
 
 ---
 
