@@ -6,8 +6,7 @@ The application provides a seamless online shopping experience with product brow
 ---
 
 ## 📹 Demo
-
-👉 [Watch the Demo Video]([[https://your-demo-video-link.com](https://youtu.be/EXCrOGR7VL4](https://drive.google.com/file/d/1-6y-Cfs3L3tQdjZzr435HjA_9I9fK0rR/view?usp=drive_link)))  
+ [Watch the Demo Video](University Project)]([https://github.com/hienlazada1/<REPO_ECOM_BE_NAME>)](https://youtu.be/EXCrOGR7VL4](https://drive.google.com/file/d/1-6y-Cfs3L3tQdjZzr435HjA_9I9fK0rR/view?usp=drive_link))
 
 ---
 
