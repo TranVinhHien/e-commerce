@@ -1,45 +1,77 @@
-# E-commerce Backend - Golang API
+# 🛒 E-Commerce Application
 
-## Yêu cầu cài đặt
+An end-to-end **E-Commerce platform** with a **Golang API backend**, **MySQL + Redis** for data management, and a **Flutter mobile app** for end-users.  
+The application provides a seamless online shopping experience with product browsing, purchasing, payment integration, and AI-powered search.  
 
-- **MySQL** và **Redis** (cài trên máy hoặc Docker)
+---
 
-### Cài đặt MySQL và Redis bằng Docker
+## 📹 Demo
+
+👉 [Watch the Demo Video](https://your-demo-video-link.com)  
+
+---
+
+## 🚀 Features
+
+- **Product Listing** – Browse available products with categories and filters.  
+- **Product Details** – View detailed information including images, description, and price.  
+- **Shopping & Checkout** – Add products to cart and place orders.  
+- **Online Payment** – Integrated with **MoMo** payment gateway.  
+- **Order Tracking** – Check order history and real-time status updates.  
+- **Smart Search**  
+  - 🔎 Search by **text** keywords.  
+  - 📷 Search by **image** using a Deep Learning model.  
+- **Secure Session & Caching** – Redis-based caching and session management.  
+
+---
+
+## 🛠 Tech Stack
+
+- **Backend:** Golang (RESTful API)  
+- **Database:** MySQL 8.3.0  
+- **Cache & Session:** Redis  
+- **Mobile App:** Flutter  
+- **AI Model:** Deep Learning (image & text search)  
+- **Payment Integration:** MoMo  
+
+---
+
+## ⚙️ Backend Installation (Golang API)
+
+### Prerequisites
+
+- **MySQL** (v8.3.0) and **Redis**  
+- **Go** (v1.22.2)  
+
+### Run MySQL & Redis with Docker
 
 ```bash
 # MySQL
 docker run --name mysql_c -e MYSQL_ROOT_PASSWORD=12345 -p 3306:3306 -d mysql:8.3.0
 
 # Redis
-docker run -d --name redis_c -p 6379:6379 \
-  -v /data/redis-data/:/data \
-  -e REDIS_ARGS="--requirepass 12345 --appendonly yes" \
-  redis:latest
+docker run -d --name redis_c -p 6379:6379   -v /data/redis-data/:/data   -e REDIS_ARGS="--requirepass 12345 --appendonly yes"   redis:latest
 ```
 
-> **Lưu ý:**  
-> - Nếu chạy MySQL trên máy, đặt mật khẩu là `12345`, port `3306`, phiên bản `8.3.0`.  
-> - Nếu chạy Redis local, sử dụng port `6379`.
+> **Note:**  
+> - If running MySQL locally, set password to `12345`, port `3306`, version `8.3.0`.  
+> - For local Redis, use port `6379`.  
 
 ---
 
-### Cài đặt Golang
-
-Tải và cài đặt Go phiên bản **1.22.2**:
+### Install Golang
 
 ```bash
 wget https://go.dev/dl/go1.22.2.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.22.2.linux-amd64.tar.gz
 nano ~/.bashrc
-# Thêm dòng sau vào cuối file:
+# Add the following at the end:
 export PATH=$PATH:/usr/local/go/bin
 ```
 
 ---
 
-## Khởi tạo dự án
-
-Sau khi cài đặt Go, thực hiện lệnh:
+### Initialize Project
 
 ```bash
 go mod init
@@ -47,29 +79,35 @@ go mod init
 
 ---
 
-## Khởi chạy ứng dụng
-
-> Nếu dùng Linux, thêm `sudo` trước các lệnh bên dưới nếu cần.
+### Run the Backend
 
 ```bash
-# Khởi tạo database
+# Initialize database
 make initdb
 
-# Khởi chạy container MySQL
+# Start MySQL container
 make startdb
 
-# Khởi chạy container Redis
+# Start Redis container
 make startredis
 
-# Khởi tạo bảng trong database
+# Create database tables
 make createtb
 
-# Chạy ứng dụng Go
+# Run the API server
 make run
 ```
 
 ---
 
-## Lưu ý
+## 📌 Notes
 
-- Nếu gặp lỗi thiếu thư viện, hãy cài đặt hoặc nhờ ChatGPT hỗ trợ. 
+- If dependencies are missing, install them manually or use `go get`.  
+- For Linux systems, you may need to prefix commands with `sudo`.  
+
+---
+
+## 📱 Mobile App
+
+The mobile app is built using **Flutter**, providing a clean and responsive UI for shopping, payments, and order tracking.  
+You can run it on both **Android** and **iOS** devices.  
